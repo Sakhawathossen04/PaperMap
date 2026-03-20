@@ -763,8 +763,9 @@ footer {
   gap: 10px;
   padding: 8px 12px;
   border-radius: 10px;
-  background: #0b1220;
-  border: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(135deg, rgba(245,158,11,0.14), rgba(59,130,246,0.10));
+  border: 1px solid var(--border2);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.45);
 }
 .social-icon {
   width: 22px;
@@ -772,9 +773,10 @@ footer {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #dbe6ff;
-  opacity: 0.9;
-  transition: transform .15s ease, opacity .15s ease, color .15s ease;
+  color: var(--text2);
+  opacity: 0.85;
+  border-radius: 7px;
+  transition: transform .15s ease, opacity .15s ease, color .15s ease, background-color .15s ease;
 }
 .social-icon svg {
   width: 16px;
@@ -783,23 +785,29 @@ footer {
 }
 .social-icon.kg,
 .social-icon.md {
-  border: 1px solid rgba(219,230,255,0.45);
+  border: 1px solid var(--border2);
   border-radius: 999px;
   font-family: var(--mono);
   font-size: 10px;
   line-height: 1;
   font-weight: 600;
+  background: rgba(255,255,255,0.5);
 }
 .social-icon:hover {
   opacity: 1;
   transform: translateY(-1px);
+  background: rgba(255,255,255,0.58);
   text-decoration: none;
 }
-.social-icon.gh:hover { color: #ffffff; }
+.social-icon.gh:hover { color: var(--text); }
 .social-icon.li:hover { color: #0a66c2; }
-.social-icon.kg:hover { color: #20beff; border-color: rgba(32, 190, 255, 0.7); }
-.social-icon.x:hover { color: #ffffff; }
-.social-icon.md:hover { color: #ffffff; border-color: rgba(255, 255, 255, 0.7); }
+.social-icon.kg:hover { color: #0891b2; border-color: rgba(8, 145, 178, 0.45); }
+.social-icon.x:hover { color: var(--text); }
+.social-icon.md:hover { color: var(--amber); border-color: rgba(245,158,11,0.45); }
+.social-icon:focus-visible {
+  outline: 2px solid rgba(245,158,11,0.45);
+  outline-offset: 2px;
+}
 
 .notice-grid {
   display: grid;
