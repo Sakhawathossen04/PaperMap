@@ -1,23 +1,26 @@
 # PaperMap
 
-PaperMap is a production-style interactive learning website for the paper **Attention Is All You Need** (Vaswani et al., 2017).
-It turns dense research concepts into clear visual modules, with guided sections, dynamic demos, architecture maps, and comprehension quizzes.
-
-## Live Entry Points
-
-- `index.html`: Product landing page for PaperMap.
-- `Attention_Is_All_You_Need.html`: Full interactive explainer (core application).
+PaperMap is a scalable interactive paper library.
+The project is now structured so you can keep adding new paper explainers while preserving one consistent homepage style and deployment workflow.
 
 ## Repository
 
 - GitHub: https://github.com/AdilShamim8/PaperMap
 
-## Highlights
+## Current Scope
 
-- End-to-end narrative for Transformer fundamentals.
-- Interactive modules for tokenization, embeddings, attention, architecture, and optimization.
-- Accessible baseline with semantic structure, skip link, keyboard-friendly controls, and reduced-motion support.
-- Static-site architecture with zero build step and simple deployment.
+- Homepage catalog: `index.html`
+- Live paper page: `Attention_Is_All_You_Need.html`
+- Project guide: `README.md`
+
+## Design Goal
+
+PaperMap is designed for long-term growth:
+
+- One homepage that lists all papers.
+- One standalone HTML page per paper.
+- Consistent card-style listing for discoverability.
+- Static-first architecture with zero build step.
 
 ## Project Structure
 
@@ -25,18 +28,29 @@ It turns dense research concepts into clear visual modules, with guided sections
 PaperMap/
 ├─ index.html
 ├─ Attention_Is_All_You_Need.html
+├─ favicon.svg
 └─ README.md
 ```
 
-## Local Development
+## How To Add A New Paper
 
-This project can run directly as static files.
+1. Create a new HTML page for the paper at repository root.
+2. Keep naming clear and predictable (example: `BERT_2018.html`).
+3. In `index.html`, add one new card inside the Paper Library section.
+4. For each card, include:
+	- status tag (`Live` or `Planned`)
+	- paper title
+	- short summary
+	- page link
+5. If the new page has its own metadata (title, description, social tags), update those tags in the page head.
+
+## Local Development
 
 ### Option 1: Open directly
 
-Open `index.html` in a browser.
+Open `index.html` in your browser.
 
-### Option 2: Run with a local server (recommended)
+### Option 2: Use a local static server
 
 Using Python:
 
@@ -44,9 +58,9 @@ Using Python:
 python -m http.server 8080
 ```
 
-Then open: `http://localhost:8080`
+Then open `http://localhost:8080`
 
-Using Node (if installed):
+Using Node:
 
 ```bash
 npx serve .
@@ -56,13 +70,13 @@ npx serve .
 
 ### GitHub Pages
 
-1. Push this folder to a GitHub repository.
-2. Open **Settings** -> **Pages**.
-3. Set **Source** to **Deploy from a branch**.
-4. Select branch `main` and folder `/(root)`.
-5. Save and wait for deployment.
+1. Push changes to `main`.
+2. In GitHub, open repository settings.
+3. Go to Pages.
+4. Source: Deploy from a branch.
+5. Branch: `main`, folder: `/(root)`.
 
-Site URL format:
+Live URL:
 
 ```text
 https://adilshamim8.github.io/PaperMap/
@@ -70,36 +84,23 @@ https://adilshamim8.github.io/PaperMap/
 
 ### Other Static Hosts
 
-You can deploy this project as-is to Netlify, Vercel (static), Azure Static Web Apps, or any Nginx/Apache static host.
+This project also works on Netlify, Vercel static hosting, Azure Static Web Apps, or any static server.
 
-## Production Notes
+## Maintenance Checklist
 
-- Keep file names stable to avoid broken links.
-- Prefer self-hosting fonts if you need strict offline or CSP policies.
-- For SEO previews, add a real Open Graph image URL for your domain.
-- Run Lighthouse checks before each release.
+Before release:
 
-## Content and Branding Customization
+- Confirm all paper links on homepage cards open correctly.
+- Check mobile layout for homepage and each paper page.
+- Validate social/contact links and icon visibility.
+- Verify favicon renders in browser tab.
+- Run a quick accessibility pass (focus states and contrast).
 
-- Update branding text in `index.html` and the navigation area of `Attention_Is_All_You_Need.html`.
-- Update metadata tags (`title`, `description`, and Open Graph fields) for your domain.
-- Tune section copy and examples for your audience (students, engineers, interview prep, etc.).
+## Attribution
 
-## Quality Checklist
-
-Before publishing, verify:
-
-- All section links in the top navigation scroll correctly.
-- Mobile layout is usable at widths between 360px and 430px.
-- Interactive demos render and update without console errors.
-- Quiz interactions and chart drawing functions execute correctly.
-- Keyboard tab order remains clear and predictable.
-
-## License and Attribution
-
-This project is an educational visualization of ideas from:
+Current live paper is based on:
 
 **Attention Is All You Need**
 Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, Illia Polosukhin (NeurIPS 2017).
 
-Add your preferred license in this repository if you plan to distribute or reuse this work publicly.
+Add your preferred license file if you plan to distribute this project publicly.
