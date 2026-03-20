@@ -65,7 +65,7 @@ npx serve .
 Site URL format:
 
 ```text
-https://USERNAME.github.io/REPO_NAME/
+https://adilshamim8.github.io/PaperMap/
 ```
 
 ### Other Static Hosts
