@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Language Models are Few-Shot Learners — Interactive Guide</title>
+<meta name="description" content="A product-grade interactive explainer of the GPT-3 paper Language Models are Few-Shot Learners, with visual demos for scaling, few-shot learning, architecture, and benchmarks.">
+<meta name="keywords" content="GPT-3, few-shot learning, language model, scaling laws, NLP, deep learning, interactive tutorial, in-context learning">
+<meta name="author" content="PaperMap">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#f59e0b">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="shortcut icon" href="./favicon.svg">
+<meta property="og:title" content="Language Models are Few-Shot Learners — Interactive Guide">
+<meta property="og:description" content="Visual, interactive walkthrough of the GPT-3 paper with practical intuition and demos.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Language Models are Few-Shot Learners — Interactive Guide">
+<meta name="twitter:description" content="Learn GPT-3 with animations and interactive demos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ffffff;
+  --bg2: #f8fafc;
+  --bg3: #f1f5f9;
+  --bg4: #e2e8f0;
+  --paper: #fffef8;
+  --ink-soft: #1e293b;
+  --border: rgba(15,23,42,0.10);
+  --border2: rgba(15,23,42,0.18);
+  --text: #0f172a;
+  --text2: #475569;
+  --text3: #64748b;
+  --amber: #f59e0b;
+  --amber-dim: rgba(245,158,11,0.12);
+  --blue: #3b82f6;
+  --blue-dim: rgba(59,130,246,0.12);
+  --teal: #14b8a6;
+  --teal-dim: rgba(20,184,166,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --purple: #a855f7;
+  --purple-dim: rgba(168,85,247,0.12);
+  --mono: 'IBM Plex Mono', monospace;
+  --serif: 'Instrument Serif', serif;
+  --sans: 'DM Sans', sans-serif;
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background:
+    radial-gradient(circle at 6% 0%, rgba(245,158,11,0.10), transparent 34%),
+    radial-gradient(circle at 93% 18%, rgba(20,184,166,0.08), transparent 36%),
+    linear-gradient(180deg, #fffefb 0%, #ffffff 42%, #fcfdff 100%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+::selection { background: var(--amber); color: #000; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f8fafc; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+.skip-link { position:absolute;left:12px;top:-44px;background:#0f172a;color:#fff;font-family:var(--mono);font-size:12px;text-decoration:none;padding:8px 12px;border-radius:8px;z-index:300;transition:top .2s; }
+.skip-link:focus { top:10px; }
+nav { position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);box-shadow:0 6px 28px rgba(15,23,42,0.06);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:54px; }
+.nav-logo { font-family:var(--mono);font-size:13px;color:var(--amber);letter-spacing:-0.02em;text-decoration:none;display:inline-flex;align-items:center; }
+.nav-links { display:flex;gap:4px; }
+.nav-actions { display:flex;gap:10px;align-items:center; }
+.nav-link { font-size:12px;color:var(--text2);padding:5px 10px;border-radius:6px;text-decoration:none;cursor:pointer;transition:all .2s;font-family:var(--mono); }
+.nav-link:hover { background:var(--bg3);color:var(--text); }
+.nav-link.active { background:var(--amber-dim);color:var(--amber); }
+.nav-badge { background:var(--amber-dim);color:var(--amber);font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:20px;border:1px solid rgba(245,158,11,0.2); }
+.nav-toggle { display:none;width:34px;height:34px;border-radius:8px;border:1px solid var(--border2);background:#fff;color:var(--text);font-family:var(--mono);font-size:14px;cursor:pointer; }
+.mobile-menu { position:fixed;top:54px;left:0;right:0;z-index:99;display:none;padding:10px;background:rgba(255,255,255,0.95);border-bottom:1px solid var(--border);backdrop-filter:blur(10px); }
+.mobile-menu.open { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+.mobile-menu a { text-decoration:none;font-family:var(--mono);font-size:12px;color:var(--text2);border:1px solid var(--border);border-radius:8px;background:#fff;padding:8px 10px; }
+.mobile-menu a:hover { border-color:rgba(245,158,11,0.35);color:var(--amber); }
+.hero { min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;position:relative;overflow:hidden; }
+.hero > * { position:relative;z-index:1; }
+.hero-grid { position:absolute;inset:0;background-image:linear-gradient(rgba(15,23,42,0.04) 1px, transparent 1px),linear-gradient(90deg, rgba(15,23,42,0.04) 1px, transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 60% at 50% 50%, black, transparent);pointer-events:none;z-index:0; }
+.hero-glow { position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:600px;height:400px;background:radial-gradient(ellipse, rgba(245,158,11,0.14) 0%, transparent 70%);pointer-events:none;z-index:0;animation:driftGlow 10s ease-in-out infinite; }
+.hero-eyebrow { font-family:var(--mono);font-size:11px;color:var(--amber);letter-spacing:0.12em;text-transform:uppercase;padding:5px 14px;border:1px solid rgba(245,158,11,0.25);border-radius:20px;margin-bottom:2rem;background:var(--amber-dim); }
+.hero-title { font-family:var(--serif);font-size:clamp(2.4rem, 6vw, 4.5rem);line-height:1.1;letter-spacing:-0.02em;margin-bottom:1.5rem; }
+.hero-title em { color:var(--amber);font-style:italic; }
+.hero-subtitle { max-width:600px;color:var(--text2);font-size:16px;margin-bottom:2.5rem;line-height:1.8; }
+.hero-actions { display:flex;gap:12px;flex-wrap:wrap;justify-content:center; }
+.btn-primary { background:var(--amber);color:#000;font-weight:600;font-size:14px;padding:10px 24px;border-radius:8px;border:none;cursor:pointer;text-decoration:none;transition:all .2s;display:inline-block; }
+.btn-primary:hover { background:#fbbf24;transform:translateY(-1px); }
+.btn-outline { background:transparent;color:var(--text);font-size:14px;padding:10px 24px;border-radius:8px;border:1px solid var(--border2);cursor:pointer;text-decoration:none;display:inline-block;transition:all .2s; }
+.btn-outline:hover { background:#ffffff;border-color:rgba(245,158,11,0.35); }
+.hero-stats { display:flex;gap:3rem;margin-top:4rem;padding-top:3rem;border-top:1px solid var(--border); }
+.stat { text-align:center; }
+.stat-num { font-family:var(--mono);font-size:1.6rem;font-weight:600;color:var(--amber); }
+.stat-label { font-size:12px;color:var(--text3);margin-top:2px; }
+section { max-width:1100px;margin:0 auto;padding:5rem 2rem; }
+section:nth-of-type(odd) { background:linear-gradient(180deg, rgba(245,158,11,0.02), transparent 36%);border-radius:20px; }
+.section-tag { font-family:var(--mono);font-size:11px;color:var(--amber);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.75rem;display:flex;align-items:center;gap:8px; }
+.section-tag::before { content:'';display:block;width:20px;height:1px;background:var(--amber); }
+.section-title { font-family:var(--serif);font-size:clamp(1.8rem, 3vw, 2.4rem);line-height:1.2;margin-bottom:1rem; }
+.section-title em { color:var(--amber);font-style:italic; }
+.section-desc { color:var(--text2);max-width:580px;font-size:15px;margin-bottom:2.5rem; }
+.card { background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;box-shadow:0 10px 25px rgba(15,23,42,0.04);transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.card:hover { transform:translateY(-2px);box-shadow:0 16px 32px rgba(15,23,42,0.08);border-color:rgba(245,158,11,0.22); }
+.card-sm { background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.2rem; }
+.card-label { font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px; }
+.problem-grid { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:2rem; }
+.problem-card { border-radius:var(--radius-lg);padding:1.5rem;border:1px solid var(--border); }
+.problem-card.bad { background:rgba(239,68,68,0.04);border-color:rgba(239,68,68,0.15); }
+.problem-card.good { background:rgba(34,197,94,0.04);border-color:rgba(34,197,94,0.15); }
+.problem-icon { font-size:1.5rem;margin-bottom:10px; }
+.problem-title { font-weight:600;font-size:15px;margin-bottom:8px; }
+.problem-card.bad .problem-title { color:var(--red); }
+.problem-card.good .problem-title { color:var(--green); }
+.problem-list { list-style:none; }
+.problem-list li { font-size:13px;color:var(--text2);padding:3px 0;display:flex;gap:8px;align-items:flex-start; }
+.problem-list li::before { content:'';flex-shrink:0;width:6px;height:6px;border-radius:50%;margin-top:7px; }
+.bad .problem-list li::before { background:var(--red);opacity:0.6; }
+.good .problem-list li::before { background:var(--green);opacity:0.6; }
+.formula-card { background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:2rem;text-align:center;margin:1.5rem 0; }
+.formula-main { font-family:var(--mono);font-size:clamp(14px,2.5vw,20px);color:var(--amber);letter-spacing:-0.01em;line-height:2; }
+.formula-breakdown { display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin-top:1.5rem;text-align:left; }
+.formula-piece { background:var(--bg4);border-radius:var(--radius);padding:0.8rem 1rem;border:1px solid var(--border); }
+.fp-sym { font-family:var(--mono);color:var(--amber);font-size:16px;font-weight:600;margin-bottom:4px; }
+.fp-name { font-size:12px;font-weight:600;margin-bottom:4px; }
+.fp-desc { font-size:12px;color:var(--text2);line-height:1.5; }
+.results-grid { display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin-bottom:1.5rem; }
+.result-card { background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.2rem 1.4rem; }
+.result-model { font-size:12px;color:var(--text3);margin-bottom:6px;font-family:var(--mono); }
+.result-score { font-family:var(--mono);font-size:2rem;font-weight:600; }
+.result-label { font-size:11px;color:var(--text2);margin-top:2px; }
+.result-bar-wrap { margin-top:8px;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden; }
+.result-bar { height:100%;border-radius:2px; }
+.comp-table { width:100%;border-collapse:collapse; }
+.comp-table th { padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text3);text-align:left;font-family:var(--mono);font-weight:500; }
+.comp-table td { padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2); }
+.comp-table tr:hover td { background:var(--bg3); }
+.comp-best { color:var(--green);font-weight:600; }
+.comp-worst { color:var(--red); }
+.quiz-card { background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:12px; }
+.quiz-q { font-weight:500;font-size:15px;margin-bottom:1rem; }
+.quiz-opts { display:flex;flex-direction:column;gap:8px; }
+.quiz-opt { background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;font-size:13px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px; }
+.quiz-opt:hover { border-color:var(--border2);background:var(--bg4); }
+.quiz-opt.correct { background:var(--green-dim);border-color:rgba(34,197,94,0.3);color:var(--green); }
+.quiz-opt.wrong { background:var(--red-dim);border-color:rgba(239,68,68,0.3);color:var(--red); }
+.quiz-explain { font-size:12px;color:var(--text2);margin-top:10px;padding:8px 12px;background:var(--bg3);border-radius:6px;display:none; }
+.quiz-explain.show { display:block; }
+.timeline { position:relative;padding-left:24px; }
+.timeline::before { content:'';position:absolute;left:7px;top:0;bottom:0;width:1px;background:var(--border2); }
+.tl-item { position:relative;margin-bottom:1.5rem; }
+.tl-dot { position:absolute;left:-21px;top:4px;width:10px;height:10px;border-radius:50%;border:2px solid var(--bg3); }
+.tl-year { font-family:var(--mono);font-size:11px;color:var(--amber);margin-bottom:3px; }
+.tl-title { font-weight:500;font-size:14px;margin-bottom:3px; }
+.tl-desc { font-size:13px;color:var(--text2); }
+.divider { height:1px;background:var(--border);max-width:1100px;margin:0 auto; }
+.highlight { color:var(--amber);font-weight:500; }
+.code-inline { font-family:var(--mono);background:var(--bg3);padding:1px 6px;border-radius:4px;font-size:0.92em;color:var(--text); }
+.pill { display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-family:var(--mono); }
+.pill-amber { background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,0.2); }
+.pill-blue { background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,130,246,0.2); }
+.pill-green { background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,0.2); }
+.pill-red { background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,0.2); }
+.pill-purple { background:var(--purple-dim);color:var(--purple);border:1px solid rgba(168,85,247,0.2); }
+.two-col { display:grid;grid-template-columns:1fr 1fr;gap:2rem; }
+.notice-grid { display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px; }
+.notice-card { background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem; }
+.notice-title { font-size:13px;font-weight:600;margin-bottom:6px; }
+.notice-text { font-size:12px;color:var(--text2);line-height:1.6; }
+.reading-progress { position:fixed;top:0;left:0;right:0;z-index:200;height:2px;background:transparent; }
+.reading-progress-bar { height:100%;background:var(--amber);width:0%;transition:width .1s; }
+footer { max-width:1100px;margin:0 auto;padding:3rem 2rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap; }
+.footer-left { font-size:13px;color:var(--text3); }
+.footer-left a { color:var(--amber);text-decoration:none; }
+.footer-links { display:flex;gap:16px; }
+.footer-link { font-size:12px;color:var(--text3);text-decoration:none;font-family:var(--mono);transition:color .2s; }
+.footer-link:hover { color:var(--text); }
+.footer-contact { width:100%;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:12px;color:var(--text2);line-height:1.8; }
+.footer-contact strong { color:var(--text);font-family:var(--mono);font-size:11px; }
+.footer-contact a { color:var(--amber);text-decoration:none;white-space:nowrap; }
+.social-strip { margin-top:8px;display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:linear-gradient(135deg, rgba(245,158,11,0.14), rgba(59,130,246,0.10));border:1px solid var(--border2);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.45); }
+.social-icon { width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;color:var(--text2);opacity:0.85;border-radius:7px;transition:transform .15s ease, opacity .15s ease, color .15s ease, background-color .15s ease; }
+.social-icon svg { width:16px;height:16px;fill:currentColor; }
+.social-icon.kg,.social-icon.md { border:1px solid var(--border2);border-radius:999px;font-family:var(--mono);font-size:10px;line-height:1;font-weight:600;background:rgba(255,255,255,0.5); }
+.social-icon:hover { opacity:1;transform:translateY(-1px);background:rgba(255,255,255,0.58);text-decoration:none; }
+.social-icon.gh:hover { color:var(--text); }
+.social-icon.li:hover { color:#0a66c2; }
+.social-icon.kg:hover { color:#0891b2;border-color:rgba(8,145,178,0.45); }
+.social-icon.x:hover { color:var(--text); }
+.social-icon.md:hover { color:var(--amber);border-color:rgba(245,158,11,0.45); }
+.reveal { opacity:0;transform:translateY(16px) scale(0.995);transition:opacity .6s ease, transform .6s ease; }
+.reveal.visible { opacity:1;transform:translateY(0) scale(1); }
+@keyframes fadeUp { from { opacity:0;transform:translateY(20px); } to { opacity:1;transform:translateY(0); } }
+@keyframes pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+@keyframes scaleIn { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+@keyframes driftGlow { 0%,100%{ transform:translate(-50%,-50%) scale(1); } 50%{ transform:translate(-49%,-52%) scale(1.05); } }
+@keyframes floaty { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-4px); } }
+.animate-in { animation:fadeUp .5s ease forwards; }
+.scale-bars { display:flex;flex-direction:column;gap:8px;margin-top:8px; }
+.scale-row { display:grid;grid-template-columns:80px 1fr 64px;gap:8px;align-items:center; }
+.scale-track { height:14px;background:var(--bg3);border-radius:5px;overflow:hidden;border:1px solid var(--border); }
+.scale-fill { height:100%;border-radius:4px;transform-origin:left;animation:scaleIn .9s ease; }
+.deep-grid { display:grid;grid-template-columns:1.1fr 0.9fr;gap:16px; }
+.deep-list { list-style:none; }
+.deep-list li { padding:8px 0;border-bottom:1px dashed var(--border);font-size:13px;color:var(--text2); }
+.deep-list li strong { color:var(--ink-soft); }
+@media (max-width: 768px) {
+  nav { height:50px;padding:0 12px; }
+  .mobile-menu { top:50px; }
+  .mobile-menu.open { grid-template-columns:1fr; }
+  section { padding:3rem 1rem; }
+  .hero { min-height:auto;padding:5rem 1rem 2rem; }
+  .hero-title { font-size:clamp(2rem, 10vw, 3rem);margin-bottom:1rem; }
+  .hero-subtitle { font-size:14px;line-height:1.7;margin-bottom:1.5rem; }
+  .hero-actions { width:100%; }
+  .btn-primary,.btn-outline { min-height:44px;width:100%;max-width:320px;justify-content:center; }
+  .hero-stats { width:100%;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:2rem;padding-top:1.5rem; }
+  .stat { text-align:left;border:1px solid var(--border);border-radius:10px;background:#fff;padding:8px 10px; }
+  .problem-grid { grid-template-columns:1fr; }
+  .two-col { grid-template-columns:1fr;gap:1rem; }
+  .deep-grid { grid-template-columns:1fr; }
+  nav .nav-links { display:none; }
+  .nav-badge { display:none; }
+  .nav-toggle { display:inline-flex;align-items:center;justify-content:center; }
+  .footer-links { gap:10px;width:100%;flex-wrap:wrap; }
+}
+@media (max-width: 430px) {
+  body { font-size:14px; }
+  .hero-eyebrow { font-size:10px;padding:4px 10px; }
+  .hero-title { font-size:clamp(1.8rem, 10vw, 2.5rem); }
+  .section-title { font-size:clamp(1.5rem, 7.8vw, 2rem); }
+  .hero-stats { grid-template-columns:1fr; }
+  .social-strip { width:100%;justify-content:center; }
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#problem">Skip to content</a>
+<div class="reading-progress"><div class="reading-progress-bar" id="progressBar"></div></div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="./index.html" aria-label="Go to PaperMap home">papermap</a>
+  <div class="nav-links">
+    <a class="nav-link" href="#problem">Problem</a>
+    <a class="nav-link" href="#few-shot">Few-Shot</a>
+    <a class="nav-link" href="#architecture">Architecture</a>
+    <a class="nav-link" href="#training">Training</a>
+    <a class="nav-link" href="#scaling">Scaling</a>
+    <a class="nav-link" href="#benchmarks">Benchmarks</a>
+    <a class="nav-link" href="#generation">Generation</a>
+    <a class="nav-link" href="#contamination">Contamination</a>
+    <a class="nav-link" href="#limitations">Limitations</a>
+    <a class="nav-link" href="#quiz">Quiz</a>
+  </div>
+  <div class="nav-actions">
+    <div class="nav-badge">NeurIPS 2020</div>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#problem">Problem</a>
+  <a href="#few-shot">Few-Shot</a>
+  <a href="#architecture">Architecture</a>
+  <a href="#training">Training</a>
+  <a href="#scaling">Scaling</a>
+  <a href="#benchmarks">Benchmarks</a>
+  <a href="#generation">Generation</a>
+  <a href="#contamination">Contamination</a>
+  <a href="#limitations">Limitations</a>
+  <a href="#quiz">Quiz</a>
+</div>
+
+<!-- HERO -->
+<div class="hero" id="top">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-eyebrow">Interactive Paper Explainer</div>
+  <h1 class="hero-title">
+    <em>Few-Shot</em> Learners<br>GPT-3
+  </h1>
+  <p class="hero-subtitle">
+    A visual, step-by-step guide to the landmark paper that showed scaling language models
+    to 175 billion parameters unlocks remarkable in-context learning — no fine-tuning needed.
+  </p>
+  <div class="hero-actions">
+    <a class="btn-primary" href="#problem">Start Learning</a>
+    <a class="btn-outline" href="https://arxiv.org/abs/2005.14165" target="_blank">Read the Paper ↗</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">175B</div>
+      <div class="stat-label">Parameters</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">300B</div>
+      <div class="stat-label">Training Tokens</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">42+</div>
+      <div class="stat-label">Benchmarks Tested</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">2020</div>
+      <div class="stat-label">Year Published</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- TIMELINE -->
+<section id="timeline">
+  <div class="section-tag">History</div>
+  <h2 class="section-title">From GPT-1 to <em>GPT-3</em></h2>
+  <p class="section-desc">GPT-3 didn't appear from nowhere. Here's the evolution of generative pre-trained models.</p>
+  <div class="two-col">
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-dot" style="background:var(--text3)"></div><div class="tl-year">2017</div><div class="tl-title">Transformer (Vaswani et al.)</div><div class="tl-desc">Attention Is All You Need introduced the Transformer architecture — foundation for everything that follows.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--blue)"></div><div class="tl-year">2018</div><div class="tl-title">GPT-1 (117M params)</div><div class="tl-desc">First GPT. Showed unsupervised pre-training + supervised fine-tuning works. Decoder-only Transformer.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--purple)"></div><div class="tl-year">2019</div><div class="tl-title">GPT-2 (1.5B params)</div><div class="tl-desc">10× larger. Zero-shot task transfer. "Too dangerous to release." Showed scale matters.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--amber)"></div><div class="tl-year">2020</div><div class="tl-title">🚀 GPT-3 (175B params)</div><div class="tl-desc">100× GPT-2. Few-shot learning without fine-tuning. Changed how we think about AI capabilities.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--green)"></div><div class="tl-year">2022–now</div><div class="tl-title">ChatGPT, GPT-4, Claude...</div><div class="tl-desc">GPT-3's in-context learning paradigm became the foundation for all modern AI assistants.</div></div>
+    </div>
+    <div class="card" style="padding:1.5rem;">
+      <div class="card-label">Key Insight</div>
+      <p style="font-size:14px;color:var(--text2);line-height:1.8;margin-bottom:1rem;">The fundamental breakthrough: <span class="highlight">scaling up language models</span> massively improves their ability to learn tasks from just a few examples in the prompt — no gradient updates needed.</p>
+
+      <div style="background:var(--bg3);border-radius:var(--radius);padding:1rem;margin-top:1rem;">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px;">PARAMETER GROWTH</div>
+        <div id="paramGrowthChart"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="section-tag">Chapter 01</div>
+  <h2 class="section-title">The Problem with <em>Fine-Tuning</em></h2>
+  <p class="section-desc">Before GPT-3, the dominant approach was: pre-train a big model, then fine-tune on each task. But this had serious limitations.</p>
+  <div class="problem-grid">
+    <div class="problem-card bad">
+      <div class="problem-icon">😰</div>
+      <div class="problem-title">Fine-Tuning Problems</div>
+      <ul class="problem-list">
+        <li>Need thousands of labeled examples per task</li>
+        <li>Separate model copy for every single task</li>
+        <li>Can overfit on narrow distributions</li>
+        <li>Doesn't match how humans learn (from few examples)</li>
+        <li>Expensive to retrain for each new application</li>
+      </ul>
+    </div>
+    <div class="problem-card good">
+      <div class="problem-icon">🚀</div>
+      <div class="problem-title">GPT-3's Solution</div>
+      <ul class="problem-list">
+        <li>Learn tasks from just a few examples in the prompt</li>
+        <li>One single model handles all tasks</li>
+        <li>No gradient updates or weight changes needed</li>
+        <li>Mimics human-like rapid task adaptation</li>
+        <li>Just describe the task in natural language</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card" style="padding:1.5rem;">
+    <div class="card-label">Analogy — Why Fine-Tuning is Like Hiring a Specialist</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;">
+      <div class="card-sm">
+        <div style="font-size:13px;color:var(--red);font-weight:500;margin-bottom:6px;">🔧 Fine-tuning = Hiring specialists</div>
+        <div style="font-size:13px;color:var(--text2);">Need a translator? Hire a translator. Need a summarizer? Hire a summarizer. Each specialist needs training (data), salary (compute), and space (storage). 50 tasks = 50 specialists.</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:13px;color:var(--green);font-weight:500;margin-bottom:6px;">🧠 Few-shot = One genius polymath</div>
+        <div style="font-size:13px;color:var(--text2);">Show the polymath 2-3 examples of any task, and they figure it out. One person, all tasks. That's GPT-3: show it examples in the prompt, and it adapts instantly.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEW-SHOT LEARNING -->
+<section id="few-shot">
+  <div class="section-tag">Chapter 02</div>
+  <h2 class="section-title">The Core Idea — <em>In-Context Learning</em></h2>
+  <p class="section-desc">GPT-3 learns tasks at inference time by conditioning on examples in the prompt. No training loop. No backpropagation. Just text.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:2rem;">
+    <div class="card" style="border-left:3px solid var(--red);">
+      <div style="font-family:var(--mono);font-size:1.5rem;font-weight:600;color:var(--red);margin-bottom:6px;">Zero-Shot</div>
+      <div style="font-size:12px;font-weight:500;margin-bottom:4px;">No examples — just a task description</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;">The model receives only a natural language instruction. "Translate English to French: cheese →"</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:8px;background:var(--bg3);padding:6px 8px;border-radius:6px;">Prompt: "Translate to French: cheese →"<br>Output: "fromage"</div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--blue);">
+      <div style="font-family:var(--mono);font-size:1.5rem;font-weight:600;color:var(--blue);margin-bottom:6px;">One-Shot</div>
+      <div style="font-size:12px;font-weight:500;margin-bottom:4px;">One example + task description</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;">The model sees one (input, output) demonstration, then must apply the same pattern to a new input.</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:8px;background:var(--bg3);padding:6px 8px;border-radius:6px;">sea → mer<br>cheese → <span style="color:var(--amber);">fromage</span></div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div style="font-family:var(--mono);font-size:1.5rem;font-weight:600;color:var(--green);margin-bottom:6px;">Few-Shot</div>
+      <div style="font-size:12px;font-weight:500;margin-bottom:4px;">K examples (10–100) + task description</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;">The model sees K demonstrations. Performance improves with more examples. This is GPT-3's sweet spot.</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:8px;background:var(--bg3);padding:6px 8px;border-radius:6px;">sea → mer<br>hello → bonjour<br>cat → chat<br>cheese → <span style="color:var(--amber);">fromage ✓</span></div>
+    </div>
+  </div>
+
+  <!-- Interactive few-shot demo -->
+  <div class="card" style="overflow:hidden;">
+    <div style="padding:0 0 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <span style="font-family:var(--mono);font-size:13px;color:var(--text2);">// Interactive Few-Shot Demo — try different tasks</span>
+      <div style="display:flex;gap:6px;" id="fewShotTabs"></div>
+    </div>
+    <div style="padding:1rem 0 0;">
+      <div id="fewShotPrompt" style="font-family:var(--mono);font-size:13px;color:var(--text2);line-height:2;background:var(--bg3);padding:1rem;border-radius:var(--radius);white-space:pre-line;"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:1rem;">
+        <button class="btn-primary" id="fewShotRunBtn" type="button" style="font-size:13px;padding:8px 18px;">Run Prediction →</button>
+        <div id="fewShotResult" style="font-family:var(--mono);font-size:14px;color:var(--amber);font-weight:600;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="section-tag">Chapter 03</div>
+  <h2 class="section-title">GPT-3 <em>Architecture</em></h2>
+  <p class="section-desc">GPT-3 uses the same decoder-only Transformer as GPT-2 — but scaled to an unprecedented 175 billion parameters across 96 layers.</p>
+
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-label">Architecture Overview</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:8px;">
+      <div class="card-sm" style="text-align:center;"><div style="font-size:2rem;">🧱</div><div style="font-weight:600;font-size:14px;">Decoder-Only</div><div style="font-size:12px;color:var(--text2);">No encoder. Autoregressive. Predicts next token.</div></div>
+      <div class="card-sm" style="text-align:center;"><div style="font-size:2rem;">📚</div><div style="font-weight:600;font-size:14px;">96 Layers</div><div style="font-size:12px;color:var(--text2);">Deep stack of Transformer decoder blocks.</div></div>
+      <div class="card-sm" style="text-align:center;"><div style="font-size:2rem;">🧠</div><div style="font-weight:600;font-size:14px;">12,288 dims</div><div style="font-size:12px;color:var(--text2);">Model dimension d_model for the 175B model.</div></div>
+      <div class="card-sm" style="text-align:center;"><div style="font-size:2rem;">👁️</div><div style="font-weight:600;font-size:14px;">96 Heads</div><div style="font-size:12px;color:var(--text2);">Multi-head attention with 96 parallel heads.</div></div>
+      <div class="card-sm" style="text-align:center;"><div style="font-size:2rem;">📏</div><div style="font-weight:600;font-size:14px;">2048 Context</div><div style="font-size:12px;color:var(--text2);">Context window of 2048 tokens (nctx).</div></div>
+      <div class="card-sm" style="text-align:center;"><div style="font-size:2rem;">⚡</div><div style="font-weight:600;font-size:14px;">Sparse Attn</div><div style="font-size:12px;color:var(--text2);">Alternating dense and locally banded sparse patterns.</div></div>
+    </div>
+  </div>
+
+  <!-- Model sizes table -->
+  <div style="margin-top:1.5rem;">
+    <div class="card-label" style="margin-bottom:1rem;">All 8 GPT-3 Model Sizes — from Small to Full</div>
+    <div style="overflow-x:auto;">
+      <table class="comp-table">
+        <thead><tr><th>Model</th><th>Parameters</th><th>Layers</th><th>d_model</th><th>Heads</th><th>d_head</th><th>Batch Size</th></tr></thead>
+        <tbody>
+          <tr><td>GPT-3 Small</td><td>125M</td><td>12</td><td>768</td><td>12</td><td>64</td><td>0.5M</td></tr>
+          <tr><td>GPT-3 Medium</td><td>350M</td><td>24</td><td>1024</td><td>16</td><td>64</td><td>0.5M</td></tr>
+          <tr><td>GPT-3 Large</td><td>760M</td><td>24</td><td>1536</td><td>16</td><td>96</td><td>0.5M</td></tr>
+          <tr><td>GPT-3 XL</td><td>1.3B</td><td>24</td><td>2048</td><td>24</td><td>128</td><td>1M</td></tr>
+          <tr><td>GPT-3 2.7B</td><td>2.7B</td><td>32</td><td>2560</td><td>32</td><td>80</td><td>1M</td></tr>
+          <tr><td>GPT-3 6.7B</td><td>6.7B</td><td>32</td><td>4096</td><td>32</td><td>128</td><td>2M</td></tr>
+          <tr><td>GPT-3 13B</td><td>13B</td><td>40</td><td>5140</td><td>40</td><td>128</td><td>2M</td></tr>
+          <tr style="background:var(--amber-dim);"><td class="comp-best">GPT-3 175B</td><td class="comp-best">175B</td><td class="comp-best">96</td><td class="comp-best">12288</td><td class="comp-best">96</td><td>128</td><td class="comp-best">3.2M</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="formula-card">
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem;">GPT-3 Autoregressive Language Model Objective</div>
+    <div class="formula-main">L(θ) = Σ log P(token_i | token_1, ..., token_{i-1}; θ)</div>
+    <div class="formula-breakdown">
+      <div class="formula-piece"><div class="fp-sym">L(θ)</div><div class="fp-name">Loss Function</div><div class="fp-desc">Negative log-likelihood. Minimize this = maximize probability of correct next token.</div></div>
+      <div class="formula-piece"><div class="fp-sym">P(tᵢ | t₁...tᵢ₋₁)</div><div class="fp-name">Conditional Probability</div><div class="fp-desc">Probability of each token given all previous tokens. This is autoregressive — left-to-right only.</div></div>
+      <div class="formula-piece"><div class="fp-sym">θ</div><div class="fp-name">Model Parameters</div><div class="fp-desc">175 billion learnable weights. These encode all the model's knowledge during pre-training.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TRAINING DATA -->
+<section id="training">
+  <div class="section-tag">Chapter 04</div>
+  <h2 class="section-title">Training <em>Data & Details</em></h2>
+  <p class="section-desc">GPT-3 was trained on a massive, carefully curated mixture of internet text totaling ~300 billion tokens.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:1.5rem;">
+    <div class="card">
+      <div class="card-label">Training Data Composition</div>
+      <canvas id="dataCanvas" width="300" height="300" style="max-width:100%;display:block;margin:10px auto;"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-label">Dataset Details</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+        <div class="card-sm"><strong style="color:var(--amber);">CommonCrawl (filtered)</strong><br><span style="font-size:12px;color:var(--text2);">410B tokens, 60% weight. Heavily filtered for quality from 45TB raw data.</span></div>
+        <div class="card-sm"><strong style="color:var(--blue);">WebText2</strong><br><span style="font-size:12px;color:var(--text2);">19B tokens, 22% weight. Reddit links with 3+ karma — higher quality.</span></div>
+        <div class="card-sm"><strong style="color:var(--green);">Books1 & Books2</strong><br><span style="font-size:12px;color:var(--text2);">12B + 55B tokens, 8%+8% weight. Long-form text for coherent reasoning.</span></div>
+        <div class="card-sm"><strong style="color:var(--purple);">Wikipedia</strong><br><span style="font-size:12px;color:var(--text2);">3B tokens, 3% weight. High-quality factual knowledge.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+    <div class="card-sm"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">Optimizer</div><div style="font-size:12px;color:var(--text2);">Adam (β₁=0.9, β₂=0.95, ε=10⁻⁸). Gradient clipped at global norm 1.0. Weight decay = 0.1.</div></div>
+    <div class="card-sm"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">Learning Rate</div><div style="font-size:12px;color:var(--text2);">Cosine decay to 10% over 260B tokens. Linear warmup for first 375M tokens. Batch size ramped linearly over first 4-12B tokens.</div></div>
+    <div class="card-sm"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">Hardware & Data</div><div style="font-size:12px;color:var(--text2);">V100 GPU cluster (Microsoft). 93% English, 7% other languages. Data sampled without replacement. Trained for 300B tokens total.</div></div>
+  </div>
+
+  <div class="card" style="margin-top:1rem;padding:1.2rem;">
+    <div class="card-label" style="margin-bottom:8px;">CommonCrawl Filtering Pipeline (Appendix A)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+      <div class="card-sm"><div style="font-size:12px;font-weight:500;color:var(--amber);margin-bottom:4px;">1. Quality Filter</div><div style="font-size:11px;color:var(--text2);">Trained a logistic regression classifier using WebText as positive examples and raw CommonCrawl as negative. Documents kept probabilistically (α=9 Pareto distribution).</div></div>
+      <div class="card-sm"><div style="font-size:12px;font-weight:500;color:var(--blue);margin-bottom:4px;">2. Fuzzy Dedup</div><div style="font-size:11px;color:var(--text2);">MinHashLSH with 10 hashes to remove documents with high overlap. WebText also removed from CommonCrawl. Reduced dataset ~10%.</div></div>
+      <div class="card-sm"><div style="font-size:12px;font-weight:500;color:var(--green);margin-bottom:4px;">3. Benchmark Removal</div><div style="font-size:11px;color:var(--text2);">Attempted to remove overlaps with benchmark test/dev sets. A bug caused partial removal only — analyzed in Section 4 (Data Contamination).</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SCALING -->
+<section id="scaling">
+  <div class="section-tag">Chapter 05</div>
+  <h2 class="section-title">Scaling Laws — <em>Bigger is Better</em></h2>
+  <p class="section-desc">One of the paper's most important findings: performance scales smoothly and predictably as model size increases across most tasks.</p>
+
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-label">Model Size vs Performance</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">Larger models show dramatically better few-shot performance. This is the paper's central empirical result.</div>
+    <div id="scalingChart"></div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-label">⚡ LAW 1: Prediction Before Explanation</div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.7;"><strong>Prediction:</strong> "If I make a model 10× bigger, will few-shot accuracy go up?" <strong>Yes.</strong> The paper shows near-linear improvement on log-scale for most benchmarks. This was surprising — many expected diminishing returns.</p>
+    </div>
+    <div class="card">
+      <div class="card-label">🔴 LAW 2: Failure Modes Over Features</div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.7;"><strong>Where does scaling fail?</strong> Some tasks (like natural language inference, reading comprehension on specific datasets like ANLI) showed minimal improvement even at 175B. Scale alone doesn't solve everything.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem;">
+    <div class="card-label">🟢 LAW 3: Compression — The Key Takeaway in One Sentence</div>
+    <p style="font-size:15px;color:var(--text);line-height:1.8;font-weight:500;">"Scale the model big enough, and it can learn new tasks just from a few examples in the prompt — no fine-tuning, no gradient updates, no new parameters."</p>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BENCHMARKS -->
+<section id="benchmarks">
+  <div class="section-tag">Chapter 06</div>
+  <h2 class="section-title">Benchmark <em>Results</em></h2>
+  <p class="section-desc">GPT-3 was tested on 42+ benchmarks across language modeling, QA, translation, common sense, reading comprehension, and more.</p>
+
+  <!-- Headline results -->
+  <div class="results-grid">
+    <div class="result-card" style="border-color:rgba(245,158,11,0.2);"><div class="result-model">LAMBADA (Few-shot)</div><div class="result-score" style="color:var(--amber);">86.4%</div><div class="result-label">Accuracy (prev SOTA: 68%)</div><div class="result-bar-wrap"><div class="result-bar" style="width:86%;background:var(--amber);"></div></div></div>
+    <div class="result-card" style="border-color:rgba(34,197,94,0.2);"><div class="result-model">CoQA (Few-shot)</div><div class="result-score" style="color:var(--green);">85.0</div><div class="result-label">F1 Score (human: 90.7)</div><div class="result-bar-wrap"><div class="result-bar" style="width:85%;background:var(--green);"></div></div></div>
+    <div class="result-card" style="border-color:rgba(59,130,246,0.2);"><div class="result-model">TriviaQA (Few-shot)</div><div class="result-score" style="color:var(--blue);">71.2%</div><div class="result-label">Accuracy (SOTA in closed-book)</div><div class="result-bar-wrap"><div class="result-bar" style="width:71%;background:var(--blue);"></div></div></div>
+    <div class="result-card" style="border-color:rgba(168,85,247,0.2);"><div class="result-model">PTB Perplexity (Zero-shot)</div><div class="result-score" style="color:var(--purple);">20.5</div><div class="result-label">New SOTA (prev: 35.8)</div><div class="result-bar-wrap"><div class="result-bar" style="width:42%;background:var(--purple);"></div></div></div>
+  </div>
+
+  <!-- Full results table -->
+  <div class="card" style="margin-top:1.5rem;padding:1.5rem;">
+    <div class="card-label" style="margin-bottom:1rem;">Comprehensive Results (Table from Paper)</div>
+    <div style="overflow-x:auto;">
+      <table class="comp-table">
+        <thead><tr><th>Task Category</th><th>Benchmark</th><th>Zero-shot</th><th>One-shot</th><th>Few-shot</th><th>Fine-tuned SOTA</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill pill-amber">LM</span></td><td>LAMBADA (acc)</td><td>76.2%</td><td>72.5%</td><td class="comp-best">86.4%</td><td>68.0%</td></tr>
+          <tr><td><span class="pill pill-amber">LM</span></td><td>HellaSwag (acc)</td><td>78.9%</td><td>78.1%</td><td>79.3%</td><td class="comp-best">85.6%</td></tr>
+          <tr><td><span class="pill pill-amber">LM</span></td><td>StoryCloze (acc)</td><td>83.2%</td><td>84.7%</td><td>87.7%</td><td class="comp-best">91.8%</td></tr>
+          <tr><td><span class="pill pill-blue">QA</span></td><td>NaturalQS (acc)</td><td>14.6%</td><td>23.0%</td><td>29.9%</td><td class="comp-best">36.6%</td></tr>
+          <tr><td><span class="pill pill-blue">QA</span></td><td>WebQS (acc)</td><td>14.4%</td><td>25.3%</td><td>41.5%</td><td class="comp-best">45.5%</td></tr>
+          <tr><td><span class="pill pill-blue">QA</span></td><td>TriviaQA (acc)</td><td>64.3%</td><td>68.0%</td><td class="comp-best">71.2%</td><td>68.0%</td></tr>
+          <tr><td><span class="pill pill-green">Translation</span></td><td>EN→FR (BLEU)</td><td>25.2</td><td>28.3</td><td>32.6</td><td class="comp-best">45.6</td></tr>
+          <tr><td><span class="pill pill-green">Translation</span></td><td>FR→EN (BLEU)</td><td>21.2</td><td>33.7</td><td class="comp-best">39.2</td><td>35.0</td></tr>
+          <tr><td><span class="pill pill-green">Translation</span></td><td>DE→EN (BLEU)</td><td>27.2</td><td>30.4</td><td class="comp-best">40.6</td><td>40.2</td></tr>
+          <tr><td><span class="pill pill-purple">Winograd</span></td><td>Winograd (acc)</td><td>88.3%</td><td>89.7%</td><td>88.6%</td><td class="comp-best">90.1%</td></tr>
+          <tr><td><span class="pill pill-purple">Winograd</span></td><td>Winogrande (acc)</td><td>70.2%</td><td>73.2%</td><td>77.7%</td><td class="comp-best">84.6%</td></tr>
+          <tr><td><span class="pill pill-red">Reasoning</span></td><td>PIQA (acc)</td><td>80.5%</td><td>80.5%</td><td class="comp-best">82.8%</td><td>79.4%</td></tr>
+          <tr><td><span class="pill pill-red">Reasoning</span></td><td>ARC-Challenge (acc)</td><td>51.4%</td><td>53.2%</td><td>51.5%</td><td class="comp-best">78.5%</td></tr>
+          <tr><td><span class="pill pill-red">Reasoning</span></td><td>OpenBookQA (acc)</td><td>57.6%</td><td>58.8%</td><td>65.4%</td><td class="comp-best">87.2%</td></tr>
+          <tr><td><span class="pill pill-amber">Reading</span></td><td>CoQA (F1)</td><td>81.5</td><td>84.0</td><td>85.0</td><td class="comp-best">90.7</td></tr>
+          <tr><td><span class="pill pill-amber">Reading</span></td><td>DROP (F1)</td><td>23.6</td><td>34.3</td><td>36.5</td><td class="comp-best">89.1</td></tr>
+          <tr><td><span class="pill pill-amber">Reading</span></td><td>SQuAD 2.0 (F1)</td><td>59.5</td><td>65.4</td><td>69.8</td><td class="comp-best">93.0</td></tr>
+          <tr><td><span class="pill pill-blue">SuperGLUE</span></td><td>SuperGLUE (avg)</td><td>—</td><td>—</td><td>71.8</td><td class="comp-best">89.0</td></tr>
+          <tr><td><span class="pill pill-red">NLI</span></td><td>ANLI R3 (acc)</td><td class="comp-worst">33.5%</td><td class="comp-worst">34.3%</td><td class="comp-worst">40.2%</td><td class="comp-best">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px;font-family:var(--mono);">Green = best in category (GPT-3 beats fine-tuned SOTA). Red = weak spots. References: Tables 3.1–3.9 in paper.</div>
+  </div>
+
+  <!-- Synthetic tasks -->
+  <div class="card" style="margin-top:1rem;padding:1.5rem;">
+    <div class="card-label" style="margin-bottom:1rem;">Synthetic & Qualitative Tasks (Section 3.9)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="card-sm"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">Arithmetic (Few-shot)</div><div style="font-size:12px;color:var(--text2);line-height:1.6;">2-digit addition: <strong>100%</strong>, 2-digit subtraction: 98.9%, 3-digit addition: 80.2%, 3-digit subtraction: 94.2%, 4-digit: 25-26%, 5-digit: 9-10%, 2-digit multiplication: 29.2%</div></div>
+      <div class="card-sm"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">SAT Analogies</div><div style="font-size:12px;color:var(--text2);line-height:1.6;">Few-shot: <strong>65.2%</strong>, One-shot: 59.1%, Zero-shot: 53.7%. Average college applicant score: 57%. GPT-3 outperforms average humans.</div></div>
+      <div class="card-sm"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">Word Scrambling (Few-shot)</div><div style="font-size:12px;color:var(--text2);line-height:1.6;">Random insertion: 67.2%, Cycle letters: 37.9%, Anagrams (A2): 39.7%. Cannot reverse words (0.4%). BPE encoding makes character-level tasks harder.</div></div>
+      <div class="card-sm"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">Novel Word Usage & Grammar</div><div style="font-size:12px;color:var(--text2);line-height:1.6;">GPT-3 correctly uses made-up words in sentences after seeing one definition. Also corrects English grammar from few examples with high accuracy.</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem;padding:1.5rem;">
+    <div class="card-label" style="margin-bottom:1rem;">Performance by Task Category (Few-shot)</div>
+    <div id="benchChart"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- GENERATION -->
+<section id="generation">
+  <div class="section-tag">Chapter 07</div>
+  <h2 class="section-title">Text <em>Generation</em> Quality</h2>
+  <p class="section-desc">GPT-3 can generate news articles that human evaluators struggle to distinguish from real human-written articles. The paper quantifies this with a rigorous human study.</p>
+
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-label" style="margin-bottom:1rem;">Human Detection Accuracy by Model Size (Table 3.11)</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">80 US-based participants were shown ~200 word articles and asked to distinguish human-written vs model-generated. 50% = random chance.</p>
+    <div style="overflow-x:auto;">
+      <table class="comp-table">
+        <thead><tr><th>Model</th><th>Mean Human Accuracy</th><th>95% CI</th><th>"I don't know" Rate</th></tr></thead>
+        <tbody>
+          <tr><td>Control (bad model)</td><td class="comp-best">86%</td><td>83%–90%</td><td>3.6%</td></tr>
+          <tr><td>GPT-3 Small (125M)</td><td>76%</td><td>72%–80%</td><td>4.9%</td></tr>
+          <tr><td>GPT-3 Medium (350M)</td><td>61%</td><td>58%–65%</td><td>6.0%</td></tr>
+          <tr><td>GPT-3 XL (1.3B)</td><td>62%</td><td>59%–65%</td><td>7.5%</td></tr>
+          <tr><td>GPT-3 6.7B</td><td>60%</td><td>56%–63%</td><td>6.2%</td></tr>
+          <tr><td>GPT-3 13B</td><td>55%</td><td>52%–58%</td><td>7.1%</td></tr>
+          <tr style="background:var(--amber-dim);"><td class="comp-worst">GPT-3 175B</td><td class="comp-worst">52%</td><td>49%–54%</td><td>7.8%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-top:6px;font-family:var(--mono);">At 175B, humans are at near-random chance (~52%) at detecting AI-generated text. p-value vs control: 1×10⁻³⁴</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="card-sm">
+      <div style="font-size:13px;font-weight:500;color:var(--amber);margin-bottom:6px;">Methodology</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6;">25 article titles/subtitles from newser.com (~215 words). Completions generated from 4 model sizes. Articles formatted programmatically (no human cherry-picking). Same context window and prompts across all models.</div>
+    </div>
+    <div class="card-sm">
+      <div style="font-size:13px;font-weight:500;color:var(--blue);margin-bottom:6px;">Longer Articles (~500 words)</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6;">12 Reuters articles (~569 words) tested separately. Accuracy was still ~52% for GPT-3 175B, barely above chance. Common indicators: factual inaccuracies, repetition, and non-sequiturs.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem;">
+    <div class="card-label" style="margin-bottom:8px;">Novel Word Usage — Learning Words from Definitions</div>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--text2);line-height:2;background:var(--bg3);padding:1rem;border-radius:var(--radius);white-space:pre-line;">A "whatpu" is a small, furry animal native to Tanzania.
+An example: <span style="color:var(--amber);font-weight:600;">We were traveling in Africa and we saw these very cute whatpus.</span>
+
+To "screeg" something is to swing a sword at it.
+An example: <span style="color:var(--amber);font-weight:600;">We screeghed at each other for several minutes and then went outside and ate ice cream.</span></div>
+    <div style="font-size:11px;color:var(--text3);margin-top:6px;">Boldface = GPT-3 completions. The model invents plausible conjugations ("screeghed") from a single definition.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DATA CONTAMINATION -->
+<section id="contamination">
+  <div class="section-tag">Chapter 08</div>
+  <h2 class="section-title">Data <em>Contamination</em> Analysis</h2>
+  <p class="section-desc">Section 4 of the paper addresses a critical concern: did GPT-3 memorize benchmark test sets from its training data?</p>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-label" style="margin-bottom:8px;">Methodology (13-gram overlap)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="card-sm">
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px;">Conservative Filtering</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;">Any example with a 13-gram overlap with training data was flagged as "potentially contaminated." A "clean" subset was created for each benchmark by removing all flagged examples.</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px;">Key Finding</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;">Although a quarter of benchmarks had &gt;50% potential contamination, in most cases performance on clean vs. full datasets changed negligibly. A bug prevented full removal during training.</div>
+      </div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+    <div class="card-sm"><div style="font-size:12px;font-weight:500;color:var(--green);margin-bottom:4px;">✅ No Effect</div><div style="font-size:11px;color:var(--text2);">Most benchmarks: Reading comp source text found but not Q/A pairs. Translation: monolingual matches only, no paired sentences. Performance unchanged.</div></div>
+    <div class="card-sm"><div style="font-size:12px;font-weight:500;color:var(--amber);margin-bottom:4px;">⚠️ Flagged</div><div style="font-size:11px;color:var(--text2);">PIQA: 29% flagged, 3% drop on clean subset (*marked in paper). Winograd: some schemas found in training data, small effect on results.</div></div>
+    <div class="card-sm"><div style="font-size:12px;font-weight:500;color:var(--red);margin-bottom:4px;">❌ Removed</div><div style="font-size:11px;color:var(--text2);">4 Wikipedia LM benchmarks and Children's Book Test were entirely contained in training data — results not reported.</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LIMITATIONS -->
+<section id="limitations">
+  <div class="section-tag">Chapter 09</div>
+  <h2 class="section-title">Limitations & <em>Societal Impact</em></h2>
+  <p class="section-desc">Sections 5–6 of the paper are remarkably honest about GPT-3's limitations and potential societal harms.</p>
+
+  <!-- Technical Limitations -->
+  <div class="card-label" style="margin-bottom:8px;">Technical Limitations (Section 5)</div>
+  <div class="notice-grid" style="margin-bottom:1.5rem;">
+    <div class="notice-card"><div class="notice-title" style="color:var(--red);">Repetition & Coherence</div><div class="notice-text">GPT-3 sometimes loses coherence in long texts, repeats itself, contradicts earlier statements, and occasionally includes non-sequitur paragraphs. No persistent memory.</div></div>
+    <div class="notice-card"><div class="notice-title" style="color:var(--blue);">Bidirectional Tasks</div><div class="notice-text">As a left-to-right autoregressive model, GPT-3 struggles on tasks requiring bidirectional context (fill-in-the-blank, comparison tasks like WiC and NLI).</div></div>
+    <div class="notice-card"><div class="notice-title" style="color:var(--amber);">Sample Efficiency</div><div class="notice-text">175B parameters trained on 300B tokens is still far less sample-efficient than human learning. Humans see far less text in a lifetime yet learn language far more efficiently.</div></div>
+    <div class="notice-card"><div class="notice-title" style="color:var(--teal);">Interpretability</div><div class="notice-text">It's unclear what GPT-3 "knows" vs. what it's pattern-matching. The paper doesn't claim understanding — only performance on benchmarks.</div></div>
+    <div class="notice-card"><div class="notice-title" style="color:var(--purple);">Learning vs. Recognizing</div><div class="notice-text">An open question: does few-shot learning truly learn "from scratch" at inference time, or does it simply recognize tasks already seen during training? The paper acknowledges this spectrum.</div></div>
+    <div class="notice-card"><div class="notice-title" style="color:var(--green);">No Grounding</div><div class="notice-text">GPT-3 lacks grounding in physical experience, video, or real-world interaction. Future directions: learning objectives from humans, RL fine-tuning, multimodal inputs.</div></div>
+  </div>
+
+  <!-- Broader Impacts -->
+  <div class="card-label" style="margin-bottom:8px;">Broader Impacts (Section 6)</div>
+
+  <!-- 6.1 Misuse -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-label" style="margin-bottom:8px;">6.1 — Misuse of Language Models</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+      <div class="card-sm"><div style="font-size:12px;font-weight:500;color:var(--red);margin-bottom:4px;">Potential Misuse</div><div style="font-size:11px;color:var(--text2);">Misinformation, spam, phishing, fraudulent essays, social engineering. Quality of text synthesis directly increases misuse potential.</div></div>
+      <div class="card-sm"><div style="font-size:12px;font-weight:500;color:var(--amber);margin-bottom:4px;">Threat Actors</div><div style="font-size:11px;color:var(--text2);">Low/mid-skill actors showed interest post GPT-2 but no successful deployments observed. APTs have not yet found LMs significantly better than current methods.</div></div>
+      <div class="card-sm"><div style="font-size:12px;font-weight:500;color:var(--blue);margin-bottom:4px;">Countermeasures</div><div style="font-size:11px;color:var(--text2);">Automatic discriminators (GROVER, GLTR) may outperform humans at detection. Promising area for future research. Watermarking and detection tools needed.</div></div>
+    </div>
+  </div>
+
+  <!-- 6.2 Bias -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-label" style="margin-bottom:8px;">6.2 — Fairness, Bias, and Representation</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+      <div class="card-sm">
+        <div style="font-size:12px;font-weight:600;color:var(--purple);margin-bottom:4px;">Gender Bias</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.6;"><strong>83%</strong> of 388 occupations tested were more likely followed by a male gender identifier. High-education occupations (legislator, professor) skewed heavily male. Female identifiers associated more with appearance words ("beautiful", "gorgeous").</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:12px;font-weight:600;color:var(--teal);margin-bottom:4px;">Race Sentiment</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.6;">Sentiment analysis of generated text varied by race prompt. The paper found that models reflect socio-historical associations from training data. Asian consistently had the highest positive sentiment across model sizes.</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:4px;">Religion</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.6;">Islam disproportionately co-occurred with words like "terrorism" and "violent." Buddhism associated with "peace" and "enlightenment." Models reflect internet-scale stereotypes from training data.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6.3 Energy -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="card-label" style="margin-bottom:8px;">6.3 — Energy Usage</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="card-sm">
+        <div style="font-size:12px;font-weight:500;color:var(--red);margin-bottom:4px;">Training Cost</div>
+        <div style="font-size:11px;color:var(--text2);">GPT-3 175B consumed several <strong>thousand petaflop/s-days</strong> of compute during pre-training, vs. tens of petaflop/s-days for GPT-2 1.5B. Trained on V100 GPU cluster provided by Microsoft.</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:12px;font-weight:500;color:var(--green);margin-bottom:4px;">Amortized Efficiency</div>
+        <div style="font-size:11px;color:var(--text2);">Once trained, generating 100 pages of content costs ~0.4 kW-hr (a few cents). Model distillation can further reduce cost. The paradigm: train one large model, then create efficient versions.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONCLUSION -->
+<section id="conclusion">
+  <div class="section-tag">Paper Conclusion</div>
+  <h2 class="section-title">Conclusion — <em>Section 8</em></h2>
+  <p class="section-desc">The paper's conclusion summarizes the key contributions and looks forward.</p>
+
+  <div class="card" style="padding:1.5rem;">
+    <div style="font-size:14px;color:var(--text);line-height:1.8;">
+      <p style="margin-bottom:1rem;">We presented GPT-3, a 175 billion parameter language model that demonstrates strong performance on many NLP tasks and benchmarks in the <strong>zero-shot</strong>, <strong>one-shot</strong>, and <strong>few-shot</strong> settings — in some cases nearly matching the performance of state-of-the-art fine-tuned systems.</p>
+      <p style="margin-bottom:1rem;">The paper documented <strong>roughly predictable trends</strong> of scaling in performance without using fine-tuning. It also discussed the social impacts of this class of model.</p>
+      <p>Despite many limitations and weaknesses, these results suggest that <span class="highlight">very large language models may be an important ingredient in the development of adaptable, general language systems</span>.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="section-tag">Test Yourself</div>
+  <h2 class="section-title">Quick <em>Quiz</em></h2>
+  <p class="section-desc">Check your understanding of the key concepts from the GPT-3 paper.</p>
+  <div id="quizContainer"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FORMULAS -->
+<section id="formulas">
+  <div class="section-tag">Reference</div>
+  <h2 class="section-title">Key <em>Takeaways</em></h2>
+  <p class="section-desc">Everything you need to remember about this paper.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:1.5rem;">
+    <div class="card-sm">✅ Scaling model size improves few-shot performance smoothly across most tasks.</div>
+    <div class="card-sm">✅ In-context learning requires no gradient updates — tasks specified via text prompt.</div>
+    <div class="card-sm">✅ 175B parameters — 10× larger than any previous non-sparse language model.</div>
+    <div class="card-sm">✅ Few-shot GPT-3 is competitive with fine-tuned SOTA on many benchmarks.</div>
+    <div class="card-sm">✅ Generated text is nearly indistinguishable from human-written text.</div>
+    <div class="card-sm">✅ Limitations and societal impacts are openly discussed — a model for responsible AI research.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DEPLOY -->
+<section id="publish">
+  <div class="section-tag">Deployment</div>
+  <h2 class="section-title">Publish This Site to <em>GitHub Pages</em></h2>
+  <p class="section-desc">Push this project and publish with GitHub Pages.</p>
+  <div style="background:linear-gradient(180deg, rgba(245,158,11,0.08), rgba(245,158,11,0.02));border:1px solid rgba(245,158,11,0.24);border-radius:var(--radius-lg);padding:1.5rem;">
+    <div class="card-label">Quick Publish Workflow</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:1rem;">
+      <div class="card-sm">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;">1) Push to GitHub</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text2);background:#fff;padding:8px;border-radius:6px;border:1px solid var(--border);margin-top:6px;">git add .<br>git commit -m "feat: GPT-3 paper explainer"<br>git push -u origin main</div>
+      </div>
+      <div class="card-sm">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;">2) Enable GitHub Pages</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:6px;">Repo Settings → Pages → Deploy from branch → main → /(root) → Save</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-left">Built with ❤️ to explain <a href="https://arxiv.org/abs/2005.14165" target="_blank">"Language Models are Few-Shot Learners"</a> (Brown et al., 2020)</div>
+  <div class="footer-links">
+    <a class="footer-link" href="https://arxiv.org/abs/2005.14165" target="_blank">Paper</a>
+    <a class="footer-link" href="https://github.com/AdilShamim8/PaperMap" target="_blank" rel="noopener noreferrer">PaperMap Repo</a>
+    <a class="footer-link" href="./Attention_Is_All_You_Need.html">Transformer Guide</a>
+    <a class="footer-link" href="./Training_Language_Models_to_Follow_Instructions_with_Human_Feedback.html">InstructGPT Guide</a>
+  </div>
+  <div class="footer-contact">
+    <strong>Contact Adil Shamim:</strong><br>
+    <div class="social-strip" aria-label="Adil Shamim social links">
+      <a class="social-icon gh" href="https://github.com/AdilShamim8" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.5 7.5 0 0 1 8 4.73c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
+      <a class="social-icon li" href="https://www.linkedin.com/in/adilshamim8" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.48 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V23h-4V8zm7 0h3.8v2h.05c.53-1 1.82-2 3.75-2C19 8 20 10.4 20 14v9h-4v-8c0-1.9-.04-4.3-2.62-4.3-2.63 0-3.03 2.05-3.03 4.18V23h-4V8z"/></svg></a>
+      <a class="social-icon kg" href="https://www.kaggle.com/adilshamim8" target="_blank" rel="noopener noreferrer" aria-label="Kaggle" title="Kaggle">k</a>
+      <a class="social-icon x" href="https://x.com/adil_shamim8" target="_blank" rel="noopener noreferrer" aria-label="Twitter X" title="Twitter X"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.24 2H21l-6.56 7.5L22.2 22h-6.1l-4.77-6.24L5.86 22H3.1l7.02-8.02L2 2h6.25l4.3 5.68L18.24 2zm-1.07 18h1.52L7.43 3.9H5.8L17.17 20z"/></svg></a>
+      <a class="social-icon md" href="https://adilshamim8.medium.com/" target="_blank" rel="noopener noreferrer" aria-label="Medium" title="Medium">m</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// === UTILS ===
+function scrollToSection(sel){const t=document.querySelector(sel);if(!t)return;window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-64,behavior:'smooth'});}
+document.addEventListener('click',e=>{const l=e.target.closest('a[href^="#"]');if(!l)return;const h=l.getAttribute('href');if(!h||h==='#')return;const t=document.querySelector(h);if(!t)return;e.preventDefault();scrollToSection(h);});
+window.addEventListener('scroll',()=>{const h=document.documentElement;document.getElementById('progressBar').style.width=(window.scrollY/(h.scrollHeight-h.clientHeight))*100+'%';});
+
+// === MOBILE MENU ===
+(function(){const t=document.getElementById('navToggle'),m=document.getElementById('mobileMenu');if(!t||!m)return;t.addEventListener('click',()=>{const o=!m.classList.contains('open');m.classList.toggle('open',o);t.setAttribute('aria-expanded',o?'true':'false');});m.addEventListener('click',e=>{if(e.target.closest('a[href^="#"]')){m.classList.remove('open');t.setAttribute('aria-expanded','false');}});})();
+
+// === NAV ACTIVE ===
+(function(){const ids=['problem','few-shot','architecture','training','scaling','benchmarks','generation','contamination','limitations','quiz'];const links=Array.from(document.querySelectorAll('.nav-link'));window.addEventListener('scroll',()=>{let cur=ids[0];ids.forEach(id=>{const s=document.getElementById(id);if(s&&window.scrollY+90>=s.offsetTop)cur=id;});links.forEach(l=>l.classList.toggle('active',(l.getAttribute('href')||'')==='#'+cur));});})();
+
+// === SCROLL REVEAL ===
+(function(){const targets=document.querySelectorAll('section,.card,.card-sm,.problem-card,.result-card,.quiz-card,.notice-card');if(window.matchMedia('(prefers-reduced-motion:reduce)').matches||!('IntersectionObserver' in window)){targets.forEach(t=>t.classList.add('visible'));return;}targets.forEach(t=>t.classList.add('reveal'));const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.12,rootMargin:'0px 0px -30px 0px'});targets.forEach(t=>obs.observe(t));})();
+
+// === PARAM GROWTH CHART ===
+(function(){const el=document.getElementById('paramGrowthChart');if(!el)return;const data=[{label:'GPT-1',v:0.117,color:'#64748b'},{label:'GPT-2',v:1.5,color:'#3b82f6'},{label:'GPT-3',v:175,color:'#f59e0b'}];const max=175;el.innerHTML=data.map(d=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><div style="font-family:var(--mono);font-size:11px;color:var(--text3);width:50px;text-align:right;">${d.label}</div><div style="flex:1;height:22px;background:var(--bg4);border-radius:4px;overflow:hidden;"><div style="height:100%;width:${Math.max((d.v/max)*100,2)}%;background:${d.color};border-radius:4px;animation:scaleIn .8s ease;transform-origin:left;"></div></div><div style="font-family:var(--mono);font-size:11px;color:var(--text2);width:50px;">${d.v>=1?d.v+'B':d.v*1000+'M'}</div></div>`).join('');})();
+
+// === DATA PIE CHART ===
+(function(){const c=document.getElementById('dataCanvas');if(!c)return;const ctx=c.getContext('2d');const W=c.width,H=c.height,cx=W/2,cy=H/2,r=110;const data=[{label:'CommonCrawl',pct:60,color:'#f59e0b'},{label:'WebText2',pct:22,color:'#3b82f6'},{label:'Books1',pct:8,color:'#22c55e'},{label:'Books2',pct:8,color:'#14b8a6'},{label:'Wikipedia',pct:3,color:'#a855f7'}];let start=0;data.forEach(d=>{const angle=d.pct/100*Math.PI*2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,start,start+angle);ctx.fillStyle=d.color;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();const mid=start+angle/2;const lx=cx+Math.cos(mid)*(r*0.65);const ly=cy+Math.sin(mid)*(r*0.65);ctx.fillStyle='#fff';ctx.font='bold 11px IBM Plex Mono';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(d.pct+'%',lx,ly);start+=angle;});ctx.fillStyle='var(--text2)';ctx.font='11px DM Sans';let ly2=10;data.forEach(d=>{ctx.fillStyle=d.color;ctx.fillRect(10,ly2,10,10);ctx.fillStyle='#475569';ctx.font='11px DM Sans';ctx.textAlign='left';ctx.fillText(d.label,26,ly2+9);ly2+=18;});})();
+
+// === SCALING CHART ===
+(function(){const el=document.getElementById('scalingChart');if(!el)return;const data=[{label:'125M',fewshot:28,color:'#94a3b8'},{label:'350M',fewshot:35,color:'#64748b'},{label:'1.3B',fewshot:45,color:'#3b82f6'},{label:'2.7B',fewshot:52,color:'#14b8a6'},{label:'6.7B',fewshot:60,color:'#8b5cf6'},{label:'13B',fewshot:68,color:'#a855f7'},{label:'175B',fewshot:85,color:'#f59e0b'}];el.innerHTML=data.map(d=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><div style="font-family:var(--mono);font-size:11px;color:var(--text3);width:50px;text-align:right;">${d.label}</div><div style="flex:1;height:24px;background:var(--bg4);border-radius:4px;overflow:hidden;position:relative;"><div style="height:100%;width:${d.fewshot}%;background:${d.color};border-radius:4px;animation:scaleIn .8s ease;transform-origin:left;"></div><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:11px;color:var(--text2);">${d.fewshot}%</span></div></div>`).join('');})();
+
+// === BENCHMARK CHART ===
+(function(){const el=document.getElementById('benchChart');if(!el)return;const data=[{task:'LAMBADA (acc)',score:76.2,color:'#f59e0b'},{task:'HellaSwag (acc)',score:78.9,color:'#3b82f6'},{task:'StoryCloze (acc)',score:83.2,color:'#22c55e'},{task:'TriviaQA (acc)',score:71.2,color:'#a855f7'},{task:'CoQA (F1)',score:85.0,color:'#14b8a6'},{task:'2-digit + (acc)',score:100,color:'#ec4899'},{task:'3-digit + (acc)',score:80.2,color:'#f97316'},{task:'ANLI R3 (acc)',score:40.2,color:'#ef4444'}];el.innerHTML=data.map(d=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><div style="font-family:var(--mono);font-size:11px;color:var(--text3);width:130px;text-align:right;flex-shrink:0;">${d.task}</div><div style="flex:1;height:24px;background:var(--bg4);border-radius:4px;overflow:hidden;position:relative;"><div style="height:100%;width:${d.score}%;background:${d.color};border-radius:4px;animation:scaleIn .8s ease;transform-origin:left;"></div><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:11px;color:var(--text2);">${d.score}</span></div></div>`).join('');})();
+
+// === FEW-SHOT DEMO ===
+(function(){const tasks={translation:{label:'🌐 Translation',examples:[{i:'sea',o:'mer'},{i:'hello',o:'bonjour'},{i:'cat',o:'chat'}],test:'cheese',answer:'fromage'},sentiment:{label:'😊 Sentiment',examples:[{i:'I love this movie!',o:'Positive'},{i:'Terrible waste of time',o:'Negative'},{i:'Pretty good overall',o:'Positive'}],test:'This is the worst restaurant ever',answer:'Negative'},arithmetic:{label:'🔢 Arithmetic',examples:[{i:'2 + 3',o:'5'},{i:'7 + 8',o:'15'},{i:'11 + 14',o:'25'}],test:'23 + 47',answer:'70'}};const tabsEl=document.getElementById('fewShotTabs');const promptEl=document.getElementById('fewShotPrompt');const resultEl=document.getElementById('fewShotResult');const runBtn=document.getElementById('fewShotRunBtn');let current='translation';function render(){tabsEl.innerHTML=Object.keys(tasks).map(k=>`<button style="font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid ${k===current?'rgba(245,158,11,0.4)':'var(--border)'};background:${k===current?'var(--amber-dim)':'var(--bg3)'};color:${k===current?'var(--amber)':'var(--text2)'};cursor:pointer;" onclick="window._selectTask('${k}')">${tasks[k].label}</button>`).join('');const t=tasks[current];let prompt='';t.examples.forEach((ex,i)=>{prompt+=`${ex.i} → ${ex.o}\n`;});prompt+=`${t.test} → ???`;promptEl.textContent=prompt;resultEl.textContent='';}window._selectTask=function(k){current=k;render();};runBtn.addEventListener('click',()=>{resultEl.textContent='✓ '+tasks[current].answer;});render();})();
+
+// === QUIZ ===
+const QUIZ_DATA=[
+  {q:'How many parameters does the full GPT-3 model have?',opts:['1.5 billion','13 billion','175 billion','1 trillion'],correct:2,explain:'GPT-3 has 175 billion parameters, making it 10× larger than any previous non-sparse language model at the time of publication (2020).'},
+  {q:'What is "few-shot" learning in GPT-3?',opts:['Training on a few hundred examples','Giving examples in the prompt without any weight updates','Fine-tuning with a small dataset','Transfer learning from a smaller model'],correct:1,explain:'Few-shot means providing K examples in the text prompt at inference time. The model does NOT update its weights — it learns the task purely from the context of the prompt.'},
+  {q:'Which dataset makes up the largest portion of GPT-3 training data?',opts:['Wikipedia','WebText2','CommonCrawl (filtered)','Books2'],correct:2,explain:'Filtered CommonCrawl accounts for 60% of the training data weight (410B tokens), though it was heavily filtered from 45TB of raw crawl data for quality.'},
+  {q:'What architecture does GPT-3 use?',opts:['Encoder-only Transformer (like BERT)','Encoder-Decoder Transformer','Decoder-only Transformer','Recurrent Neural Network'],correct:2,explain:'GPT-3 uses a decoder-only Transformer architecture (same as GPT-2), which processes text left-to-right and predicts the next token autoregressively.'},
+  {q:'How well could humans detect GPT-3 generated news articles?',opts:['95% accuracy','80% accuracy','~52% accuracy (near random)','0% — humans could never tell'],correct:2,explain:'Human evaluators could identify GPT-3 generated text only ~52% of the time — barely above the 50% random chance baseline. This showed GPT-3 text quality was nearly indistinguishable from human writing.'}
+];
+(function(){const container=document.getElementById('quizContainer');if(!container)return;container.innerHTML=QUIZ_DATA.map((q,qi)=>`<div class="quiz-card" id="quiz-${qi}"><div class="quiz-q"><span style="color:var(--amber);font-family:var(--mono);font-size:13px;">Q${qi+1}.</span> ${q.q}</div><div class="quiz-opts">${q.opts.map((opt,oi)=>`<div class="quiz-opt" id="opt-${qi}-${oi}" onclick="answerQuiz(${qi},${oi})"><span style="font-family:var(--mono);color:var(--text3);font-size:12px;">${String.fromCharCode(65+oi)}.</span> ${opt}</div>`).join('')}</div><div class="quiz-explain" id="explain-${qi}">${q.explain}</div></div>`).join('');})();
+const answered={};
+function answerQuiz(qi,oi){if(answered[qi])return;answered[qi]=true;const q=QUIZ_DATA[qi];q.opts.forEach((_,i)=>{const el=document.getElementById(`opt-${qi}-${i}`);if(i===q.correct){el.classList.add('correct');el.innerHTML='✓ '+el.innerHTML;}else if(i===oi&&i!==q.correct){el.classList.add('wrong');el.innerHTML='✗ '+el.innerHTML;}el.style.pointerEvents='none';});document.getElementById(`explain-${qi}`).classList.add('show');}
+</script>
+</body>
+</html>
