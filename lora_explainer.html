@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LoRA: Low-Rank Adaptation — Complete Beginner's Guide</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #ffffff; color: #1a1a1a; font-size: 16px; line-height: 1.75; }
+  .page { max-width: 860px; margin: 0 auto; padding: 40px 28px 80px; }
+
+  /* Typography */
+  h1 { font-size: 2rem; font-weight: 700; color: #111; letter-spacing: -0.5px; margin-bottom: 8px; }
+  h2 { font-size: 1.4rem; font-weight: 700; color: #111; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 2px solid #f0f0f0; }
+  h3 { font-size: 1.1rem; font-weight: 700; color: #222; margin: 28px 0 10px; }
+  h4 { font-size: 0.95rem; font-weight: 700; color: #444; margin: 18px 0 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  p { margin-bottom: 14px; color: #2d2d2d; }
+  ul, ol { padding-left: 22px; margin-bottom: 14px; }
+  li { margin-bottom: 6px; color: #2d2d2d; }
+  strong { font-weight: 700; color: #111; }
+  code { background: #f4f4f4; border: 1px solid #e5e5e5; border-radius: 4px; padding: 2px 6px; font-family: 'Courier New', monospace; font-size: 0.88em; color: #c7254e; }
+  a { color: #2563eb; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Header strip */
+  .hero { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 36px 32px; border-radius: 16px; margin-bottom: 40px; }
+  .hero .badge { background: rgba(255,255,255,0.2); display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 14px; }
+  .hero h1 { color: white; font-size: 1.9rem; margin-bottom: 10px; }
+  .hero p { color: rgba(255,255,255,0.88); font-size: 0.97rem; margin-bottom: 0; }
+  .hero .meta { display: flex; gap: 16px; margin-top: 18px; flex-wrap: wrap; }
+  .hero .meta span { font-size: 12px; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 12px; }
+
+  /* Prediction box */
+  .predict-box { background: #fffbeb; border: 1.5px solid #fbbf24; border-radius: 12px; padding: 18px 22px; margin: 0 0 32px; }
+  .predict-box .label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #92400e; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .predict-box p { color: #78350f; margin-bottom: 0; font-size: 0.95rem; }
+
+  /* Section callouts */
+  .callout { border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
+  .callout.blue { background: #eff6ff; border-left: 4px solid #3b82f6; }
+  .callout.green { background: #f0fdf4; border-left: 4px solid #22c55e; }
+  .callout.red { background: #fff1f2; border-left: 4px solid #f43f5e; }
+  .callout.purple { background: #faf5ff; border-left: 4px solid #a855f7; }
+  .callout.amber { background: #fffbeb; border-left: 4px solid #f59e0b; }
+  .callout p { margin-bottom: 0; font-size: 0.95rem; }
+  .callout .callout-title { font-weight: 700; margin-bottom: 6px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  /* Formula box */
+  .formula-box { background: #0f172a; color: #e2e8f0; border-radius: 12px; padding: 22px 28px; margin: 20px 0; font-family: 'Courier New', monospace; font-size: 1.05rem; text-align: center; line-height: 2; }
+  .formula-box .formula { font-size: 1.3rem; color: #93c5fd; letter-spacing: 1px; }
+  .formula-table { width: 100%; margin-top: 14px; border-collapse: collapse; font-size: 0.85rem; }
+  .formula-table td { padding: 5px 12px; border-top: 1px solid rgba(255,255,255,0.08); text-align: left; }
+  .formula-table td:first-child { color: #fbbf24; font-weight: 700; width: 80px; }
+
+  /* Step card */
+  .steps { display: flex; flex-direction: column; gap: 14px; margin: 20px 0; }
+  .step { display: flex; gap: 16px; align-items: flex-start; }
+  .step-num { width: 34px; height: 34px; border-radius: 50%; background: #1e40af; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; margin-top: 2px; }
+  .step-body h4 { margin: 0 0 4px; font-size: 0.95rem; }
+  .step-body p { margin-bottom: 0; font-size: 0.93rem; }
+
+  /* Comparison table */
+  .comp-table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 0.9rem; }
+  .comp-table th { background: #f8f8f8; padding: 10px 14px; text-align: left; font-weight: 700; border-bottom: 2px solid #e5e5e5; font-size: 0.85rem; }
+  .comp-table td { padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  .comp-table tr:hover td { background: #fafafa; }
+  .badge-green { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+  .badge-red { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+  .badge-yellow { background: #fef9c3; color: #854d0e; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+
+  /* Analogy card */
+  .analogy { background: #f8faff; border: 1px solid #c7d7f9; border-radius: 12px; padding: 18px 22px; margin: 18px 0; }
+  .analogy .emoji { font-size: 1.5rem; margin-bottom: 8px; }
+  .analogy h4 { color: #1e40af; margin-bottom: 6px; }
+  .analogy p { margin-bottom: 0; font-size: 0.93rem; }
+
+  /* Q&A exam style */
+  .qa-block { margin: 16px 0; border: 1px solid #e5e5e5; border-radius: 10px; overflow: hidden; }
+  .qa-q { background: #f8f8f8; padding: 12px 18px; font-weight: 700; font-size: 0.93rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: none; width: 100%; text-align: left; }
+  .qa-q:hover { background: #f0f0f0; }
+  .qa-a { padding: 14px 18px; font-size: 0.93rem; display: none; border-top: 1px solid #e5e5e5; background: #fff; }
+  .qa-a.open { display: block; }
+  .qa-a p { margin-bottom: 8px; }
+  .qa-a p:last-child { margin-bottom: 0; }
+
+  /* Key insight */
+  .insight { background: #f5f3ff; border: 1.5px solid #a855f7; border-radius: 12px; padding: 18px 22px; margin: 24px 0; position: relative; }
+  .insight::before { content: 'KEY INSIGHT'; position: absolute; top: -10px; left: 16px; background: #a855f7; color: white; font-size: 10px; font-weight: 800; letter-spacing: 1px; padding: 2px 8px; border-radius: 8px; }
+  .insight p { color: #4c1d95; margin-bottom: 0; font-size: 0.97rem; }
+
+  /* Warning box */
+  .warn { background: #fff1f2; border: 1.5px solid #f43f5e; border-radius: 10px; padding: 14px 18px; margin: 16px 0; }
+  .warn .warn-title { font-weight: 700; color: #be123c; margin-bottom: 6px; font-size: 0.88rem; text-transform: uppercase; letter-spacing: 0.4px; }
+  .warn p { color: #881337; margin-bottom: 0; font-size: 0.93rem; }
+
+  /* TOC */
+  .toc { background: #f9f9f9; border: 1px solid #eaeaea; border-radius: 12px; padding: 20px 24px; margin: 24px 0 36px; }
+  .toc h3 { margin: 0 0 12px; font-size: 0.95rem; color: #555; }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin-bottom: 4px; font-size: 0.92rem; }
+
+  /* Diagram SVG wrapper */
+  .diagram-wrap { background: #fafafa; border: 1px solid #e8e8e8; border-radius: 12px; padding: 20px; margin: 24px 0; overflow-x: auto; }
+  .diagram-caption { text-align: center; font-size: 0.83rem; color: #666; margin-top: 10px; }
+
+  /* Resource links */
+  .resources { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+  .resource-link { display: flex; align-items: center; gap: 12px; background: #f8f8f8; border: 1px solid #e5e5e5; border-radius: 10px; padding: 12px 16px; text-decoration: none; color: #1a1a1a; transition: background 0.15s; }
+  .resource-link:hover { background: #eff6ff; border-color: #93c5fd; }
+  .resource-link .rl-icon { width: 32px; height: 32px; border-radius: 8px; background: #1e40af; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .resource-link .rl-text { font-size: 0.88rem; }
+  .resource-link .rl-title { font-weight: 700; font-size: 0.93rem; }
+
+  /* Tags row */
+  .tags { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+  .tag { background: #eff6ff; color: #1e40af; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+
+  /* Practice exercise */
+  .exercise { background: #f0fdf4; border: 1.5px solid #22c55e; border-radius: 12px; padding: 18px 22px; margin: 14px 0; }
+  .exercise .ex-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #166534; margin-bottom: 8px; }
+  .exercise p { margin-bottom: 0; font-size: 0.93rem; color: #14532d; }
+
+  /* Bloom level bar */
+  .bloom-row { display: flex; gap: 6px; margin: 14px 0; flex-wrap: wrap; }
+  .bloom-chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .bloom-chip.active { background: #1e40af; color: white; }
+  .bloom-chip.done { background: #dcfce7; color: #166534; }
+  .bloom-chip.upcoming { background: #f4f4f4; color: #999; }
+
+  /* Two column layout */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 18px 0; }
+  @media (max-width: 620px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* Number stat */
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+  .stat-card { background: #f8f8f8; border-radius: 10px; padding: 16px; text-align: center; }
+  .stat-card .stat-num { font-size: 1.8rem; font-weight: 800; color: #1e40af; }
+  .stat-card .stat-label { font-size: 0.78rem; color: #666; margin-top: 4px; }
+  @media (max-width: 480px) { .stat-row { grid-template-columns: 1fr; } }
+
+  hr { border: none; border-top: 1px solid #f0f0f0; margin: 36px 0; }
+  .section-num { display: inline-block; background: #1e40af; color: white; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-right: 8px; vertical-align: middle; }
+
+  /* Interview card */
+  .int-q { background: white; border: 1px solid #e5e5e5; border-radius: 10px; padding: 14px 18px; margin: 10px 0; }
+  .int-q .diff { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .int-q .diff.easy { color: #16a34a; }
+  .int-q .diff.med { color: #d97706; }
+  .int-q .diff.hard { color: #dc2626; }
+  .int-q p { margin-bottom: 0; font-size: 0.93rem; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="badge">RESEARCH PAPER DEEP DIVE</div>
+    <h1>LoRA: Low-Rank Adaptation of Large Language Models</h1>
+    <p>Hu et al., Microsoft Corporation · arXiv 2106.09685 · A complete beginner-to-advanced guide</p>
+    <div class="meta">
+      <span>📄 12 pages</span>
+      <span>🏢 Microsoft Research</span>
+      <span>📅 2021</span>
+      <span>⭐ 10,000+ citations</span>
+      <span>🔗 <a href="https://arxiv.org/pdf/2106.09685" style="color:#93c5fd">arxiv.org/abs/2106.09685</a></span>
+    </div>
+  </div>
+
+  <!-- Bloom level indicator -->
+  <div class="bloom-row">
+    <div class="bloom-chip done">✓ Remember</div>
+    <div class="bloom-chip done">✓ Understand</div>
+    <div class="bloom-chip done">✓ Apply</div>
+    <div class="bloom-chip done">✓ Analyze</div>
+    <div class="bloom-chip done">✓ Evaluate</div>
+    <div class="bloom-chip done">✓ Create</div>
+  </div>
+  <p style="color:#666;font-size:0.85rem;margin-top:-4px">This guide walks you through all six levels of Bloom's Taxonomy for this topic.</p>
+
+  <!-- TOC -->
+  <div class="toc">
+    <h3>📋 Table of Contents</h3>
+    <ol>
+      <li><a href="#predict">🔮 Prediction — What is this paper about?</a></li>
+      <li><a href="#context">🌍 Background — Why do we need LoRA?</a></li>
+      <li><a href="#core-idea">💡 The Core Idea — What is Low-Rank?</a></li>
+      <li><a href="#method">⚙️ The Method — How LoRA Works</a></li>
+      <li><a href="#formula">🔢 The Formula — Step by Step</a></li>
+      <li><a href="#advantages">✅ Advantages and Failure Modes</a></li>
+      <li><a href="#results">📊 Experimental Results</a></li>
+      <li><a href="#insights">🔬 Deep Insights from the Paper</a></li>
+      <li><a href="#exam">📝 Exam-Style Questions and Answers</a></li>
+      <li><a href="#interview">🎙️ Interview Questions</a></li>
+      <li><a href="#exercises">🏋️ Practice Exercises</a></li>
+      <li><a href="#resources">📚 Further Resources</a></li>
+    </ol>
+  </div>
+
+  <!-- ========== SECTION 1: PREDICTION ========== -->
+  <h2 id="predict"><span class="section-num">1</span>Prediction — What is this paper about?</h2>
+
+  <div class="predict-box">
+    <div class="label">🔮 Before we begin — make your prediction</div>
+    <p>Before reading further, think: <em>If you had a giant AI model with 175 billion parameters and you wanted to teach it a new task (like writing SQL queries), but you couldn't afford to retrain all 175 billion parameters — what would you do?</em><br><br>
+    Your prediction: <strong>Probably train only a small part of the model.</strong> That's exactly what LoRA does — but with a clever mathematical twist using "low-rank" matrices. Let's find out what that means.</p>
+  </div>
+
+  <p>The paper proposes <strong>LoRA (Low-Rank Adaptation)</strong>, a technique to efficiently fine-tune large language models like GPT-3 by training a tiny number of extra parameters (sometimes 0.01% of the original!) while freezing the rest of the model — without sacrificing performance.</p>
+
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-num">10,000×</div><div class="stat-label">Fewer trainable parameters than full fine-tuning</div></div>
+    <div class="stat-card"><div class="stat-num">3×</div><div class="stat-label">Less GPU memory required during training</div></div>
+    <div class="stat-card"><div class="stat-num">0%</div><div class="stat-label">Extra inference latency added</div></div>
+  </div>
+
+  <!-- ========== SECTION 2: BACKGROUND ========== -->
+  <h2 id="context"><span class="section-num">2</span>Background — Why do we need LoRA?</h2>
+
+  <h3>The Problem: Fine-tuning is too expensive</h3>
+
+  <div class="analogy">
+    <div class="emoji">🧠</div>
+    <h4>Analogy: The Expert Employee</h4>
+    <p>Imagine hiring a world-class expert (a pre-trained LLM like GPT-3). This expert knows almost everything. But you need them to specialize in your company's niche. <strong>Full fine-tuning</strong> would be like re-educating the entire expert from scratch — enormously expensive. What if instead you just gave them a small notebook of task-specific notes? That's LoRA.</p>
+  </div>
+
+  <p>Modern NLP follows a two-stage process:</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h4>Pre-training</h4>
+        <p>Train a massive model (e.g., GPT-3 with 175B parameters) on huge amounts of internet text. This is done once and is very expensive.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h4>Fine-tuning</h4>
+        <p>Adapt the pre-trained model to a specific task (e.g., customer service, SQL generation). Traditionally this means updating ALL 175B parameters — one copy per task!</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>The Cost Problem</h3>
+  <table class="comp-table">
+    <tr><th>Scenario</th><th>Storage Required</th><th>Practical?</th></tr>
+    <tr><td>1 fine-tuned GPT-3 model</td><td>~350 GB</td><td><span class="badge-yellow">Barely</span></td></tr>
+    <tr><td>100 fine-tuned GPT-3 models (different tasks)</td><td>~35 TB</td><td><span class="badge-red">No</span></td></tr>
+    <tr><td>1 shared GPT-3 + 100 LoRA modules</td><td>~350 GB + 3.5 GB</td><td><span class="badge-green">Yes!</span></td></tr>
+  </table>
+
+  <h3>Existing solutions and their problems</h3>
+  <table class="comp-table">
+    <tr><th>Method</th><th>Idea</th><th>Problem</th></tr>
+    <tr><td><strong>Adapter Layers</strong></td><td>Insert small extra modules between transformer layers</td><td><span class="badge-red">Adds inference latency</span> — must process sequentially</td></tr>
+    <tr><td><strong>Prefix Tuning</strong></td><td>Prepend special trainable "prefix" tokens to input</td><td><span class="badge-red">Reduces usable sequence length</span>; hard to optimize</td></tr>
+    <tr><td><strong>BitFit</strong></td><td>Only train the bias parameters</td><td><span class="badge-yellow">Lower performance</span> than full fine-tuning</td></tr>
+    <tr><td><strong>LoRA</strong></td><td>Train tiny low-rank matrices added in parallel to weights</td><td><span class="badge-green">No latency, no length reduction, high performance!</span></td></tr>
+  </table>
+
+  <!-- ========== SECTION 3: CORE IDEA ========== -->
+  <h2 id="core-idea"><span class="section-num">3</span>The Core Idea — What is "Low-Rank"?</h2>
+
+  <h3>First, let's understand Matrix Rank</h3>
+  <div class="callout blue">
+    <div class="callout-title">📐 What is the rank of a matrix?</div>
+    <p>Think of a matrix as a grid of numbers that transforms data. The <strong>rank</strong> of a matrix tells you how much "real information" is in it — how many truly independent directions of change it captures. A matrix can be very large (say, 12,000 × 12,000) but only actually express a handful of meaningful transformations. It's like a 1,000-page book where 900 pages repeat the same 5 ideas.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="emoji">🖼️</div>
+    <h4>Analogy: Photo Compression (JPEG-like)</h4>
+    <p>A 4K image has millions of pixels, but most natural images can be compressed to just a few thousand numbers without losing much quality. That's because natural images live in a "low-dimensional" space — only a few features truly matter. Similarly, the <em>change</em> needed in a weight matrix when adapting an LLM to a new task lives in a very small "intrinsic rank" space, even if the matrix itself is huge.</p>
+  </div>
+
+  <h3>The Key Hypothesis of LoRA</h3>
+
+  <div class="insight">
+    <p>When you adapt a large pre-trained language model to a new task, the <strong>change in weights (ΔW) has a very low intrinsic rank</strong>. This means instead of learning a full d×d update to each weight matrix, you only need to learn a tiny r×d and d×r pair of matrices, where r can be as small as 1 or 4!</p>
+  </div>
+
+  <p>The evidence for this comes from two prior works:</p>
+  <ul>
+    <li><strong>Li et al. (2018)</strong> showed that over-parameterized models actually reside on a low-dimensional manifold.</li>
+    <li><strong>Aghajanyan et al. (2020)</strong> showed that pre-trained LLMs have low "intrinsic dimensionality" — they can be fine-tuned effectively even when projected into a random small subspace.</li>
+  </ul>
+
+  <!-- ========== SECTION 4: METHOD ========== -->
+  <h2 id="method"><span class="section-num">4</span>The Method — How LoRA Works</h2>
+
+  <h3>Step-by-step walkthrough</h3>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h4>Start with a pre-trained weight matrix W₀</h4>
+        <p>Every layer in a Transformer has large weight matrices (e.g., the query matrix W<sub>q</sub>). In GPT-3, these are up to 12,288 × 12,288. This matrix is <strong>frozen</strong> — we will never update it.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h4>Add two tiny trainable matrices: A and B</h4>
+        <p>Instead of modifying W₀, we inject two small matrices in <strong>parallel</strong>:<br>
+        • Matrix <code>A</code> has shape r × k (projects the input DOWN to a small rank-r space)<br>
+        • Matrix <code>B</code> has shape d × r (projects the small space back UP to the output dimension)<br>
+        Here, r is the rank — typically 1, 2, 4, or 8. Much smaller than d or k which can be thousands.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h4>Initialize carefully</h4>
+        <p>• A is initialized with random Gaussian values (like usual neural network init)<br>
+        • B is initialized to <strong>zero</strong><br>
+        This ensures that at the start of training, ΔW = BA = 0, so we start exactly from the pre-trained state with no disruption.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h4>Train only A and B</h4>
+        <p>During fine-tuning, gradients only flow through A and B. W₀ never changes. This is dramatically cheaper in compute and memory because we don't store optimizer states for the frozen parameters.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h4>Merge for deployment (zero latency!)</h4>
+        <p>After training, we can compute W = W₀ + BA and store this single merged matrix. At inference time, there's no overhead — it's just a single matrix multiplication, identical to the original model structure. To switch tasks, subtract BA and add B'A' for the new task.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visual diagram -->
+  <div class="diagram-wrap">
+    <svg width="100%" viewBox="0 0 680 380" role="img">
+      <title>LoRA architecture diagram</title>
+      <desc>Shows original frozen weight W0 in parallel with low-rank decomposition B times A, both feeding into output h</desc>
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- Input x -->
+      <rect x="285" y="320" width="110" height="40" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1"/>
+      <text x="340" y="344" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="15" font-weight="700" fill="#0369a1">x (input)</text>
+
+      <!-- Arrow from x splits -->
+      <line x1="300" y1="320" x2="180" y2="230" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="380" y1="320" x2="500" y2="230" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Frozen W0 (left path) -->
+      <rect x="80" y="150" width="200" height="80" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="2" stroke-dasharray="6 3"/>
+      <text x="180" y="182" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#92400e">W₀ ∈ ℝ^(d×k)</text>
+      <text x="180" y="202" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" fill="#a16207">Frozen (no gradient updates)</text>
+      <text x="180" y="220" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#b45309">W₀ x</text>
+
+      <!-- LoRA branch (right path): A then B -->
+      <rect x="400" y="210" width="170" height="50" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+      <text x="485" y="231" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#14532d">A ∈ ℝ^(r×k)</text>
+      <text x="485" y="249" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#166534">down-project (rank r)</text>
+
+      <line x1="485" y1="210" x2="485" y2="150" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <rect x="400" y="80" width="170" height="50" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+      <text x="485" y="101" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#1e3a8a">B ∈ ℝ^(d×r)</text>
+      <text x="485" y="119" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#1d4ed8">up-project (→ d dim)</text>
+
+      <!-- Output h -->
+      <rect x="285" y="20" width="110" height="40" rx="8" fill="#fce7f3" stroke="#be185d" stroke-width="1.5"/>
+      <text x="340" y="44" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="15" font-weight="700" fill="#9d174d">h (output)</text>
+
+      <!-- Lines from B up to h -->
+      <line x1="485" y1="80" x2="395" y2="60" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arr)"/>
+      <!-- Line from W0 up to h -->
+      <line x1="180" y1="150" x2="295" y2="60" stroke="#d97706" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Plus symbol in the middle -->
+      <circle cx="340" cy="80" r="18" fill="white" stroke="#94a3b8" stroke-width="1.5"/>
+      <text x="340" y="86" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="20" font-weight="700" fill="#6b7280">+</text>
+
+      <!-- Rank label -->
+      <rect x="510" y="150" width="130" height="50" rx="8" fill="#faf5ff" stroke="#a855f7" stroke-width="1"/>
+      <text x="575" y="170" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="700" fill="#7c3aed">r = rank</text>
+      <text x="575" y="188" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#8b5cf6">typically 1, 2, 4, or 8</text>
+      <line x1="510" y1="175" x2="488" y2="175" stroke="#a855f7" stroke-width="1" stroke-dasharray="3 3"/>
+
+      <!-- Label: ΔW = BA -->
+      <text x="320" y="148" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#1e40af">ΔW = BA</text>
+
+      <!-- Formula at bottom -->
+      <rect x="140" y="345" width="400" height="30" rx="8" fill="#f8faff" stroke="#c7d7f9" stroke-width="1"/>
+      <text x="340" y="364" text-anchor="middle" font-family="'Courier New', monospace" font-size="13" fill="#1e40af">h = W₀x + ΔWx = W₀x + BAx</text>
+    </svg>
+    <div class="diagram-caption">Figure: LoRA architecture. The frozen weight W₀ computes W₀x while the trainable matrices A and B compute BAx. Their outputs are summed.</div>
+  </div>
+
+  <!-- ========== SECTION 5: FORMULA ========== -->
+  <h2 id="formula"><span class="section-num">5</span>The Formula — Decoded Symbol by Symbol</h2>
+
+  <div class="formula-box">
+    <div class="formula">h = W₀x + ΔWx = W₀x + BAx</div>
+    <table class="formula-table">
+      <tr><td>h</td><td>Output vector from this layer</td></tr>
+      <tr><td>W₀</td><td>Original pre-trained weight matrix ∈ ℝ^(d×k) — FROZEN, never updated</td></tr>
+      <tr><td>x</td><td>Input vector to this layer</td></tr>
+      <tr><td>ΔW</td><td>The change (delta) we want to add — approximated as BA</td></tr>
+      <tr><td>B</td><td>Trainable "up-projection" matrix ∈ ℝ^(d×r) — initialized to ZERO</td></tr>
+      <tr><td>A</td><td>Trainable "down-projection" matrix ∈ ℝ^(r×k) — initialized with Gaussian noise</td></tr>
+      <tr><td>r</td><td>The rank — a hyperparameter, typically 1–16. Much smaller than d or k.</td></tr>
+    </table>
+  </div>
+
+  <h3>Why does BA have the right shape?</h3>
+  <p>Matrix dimensions must be compatible for multiplication. Let's trace through:</p>
+  <div class="callout blue">
+    <div class="callout-title">📐 Dimension check</div>
+    <p>• x has shape (k × 1) — the input<br>
+    • A has shape (r × k) — so Ax produces shape (r × 1) — a small "compressed" vector<br>
+    • B has shape (d × r) — so B(Ax) produces shape (d × 1) — back to the output dimension<br>
+    • W₀x also has shape (d × 1)<br>
+    ✓ They can be summed! Both W₀x and BAx are (d × 1).</p>
+  </div>
+
+  <h3>The Scaling factor: α/r</h3>
+  <p>The paper actually scales ΔW by <code>α/r</code> where α is a constant (set to the first r you try). This means:</p>
+  <div class="callout purple">
+    <p>The actual forward pass is: <code>h = W₀x + (α/r) · BAx</code></p>
+    <p>This scaling avoids having to retune the learning rate every time you change r, making hyperparameter search easier.</p>
+  </div>
+
+  <h3>Parameter count comparison</h3>
+  <p>For a single weight matrix of size d × k in GPT-3 (where d = k = 12,288):</p>
+  <table class="comp-table">
+    <tr><th>Method</th><th>Trainable Parameters</th><th>For r=4</th></tr>
+    <tr><td>Full fine-tuning</td><td>d × k</td><td>12,288 × 12,288 = 150,994,944</td></tr>
+    <tr><td>LoRA</td><td>r × (d + k)</td><td>4 × (12,288 + 12,288) = 98,304</td></tr>
+    <tr><td><strong>Reduction</strong></td><td colspan="2"><span class="badge-green">1,537× fewer parameters for this layer!</span></td></tr>
+  </table>
+
+  <h3>The Optimization Objective</h3>
+  <div class="formula-box">
+    <div class="formula">max<sub>Θ</sub> Σ log p<sub>Φ₀+ΔΦ(Θ)</sub>(y_t | x, y&lt;t)</div>
+    <table class="formula-table">
+      <tr><td>Φ₀</td><td>The frozen pre-trained weights</td></tr>
+      <tr><td>ΔΦ(Θ)</td><td>The weight changes, encoded by the small set of LoRA parameters Θ</td></tr>
+      <tr><td>|Θ| ≪ |Φ₀|</td><td>The number of LoRA parameters is much smaller than original model</td></tr>
+      <tr><td>y_t</td><td>The t-th token in the output sequence</td></tr>
+      <tr><td>y&lt;t</td><td>All previously generated tokens (autoregressive generation)</td></tr>
+    </table>
+  </div>
+
+  <!-- ========== SECTION 6: ADVANTAGES & FAILURE MODES ========== -->
+  <h2 id="advantages"><span class="section-num">6</span>Advantages and Failure Modes</h2>
+
+  <h3>✅ Key Advantages</h3>
+
+  <div class="two-col">
+    <div class="callout green">
+      <div class="callout-title">No inference latency</div>
+      <p>After training, merge W = W₀ + BA. The deployed model is identical in structure to the original — no extra computation at inference time.</p>
+    </div>
+    <div class="callout green">
+      <div class="callout-title">Massive memory savings</div>
+      <p>No optimizer states needed for frozen parameters. GPT-3 VRAM drops from 1.2TB to 350GB during training.</p>
+    </div>
+    <div class="callout green">
+      <div class="callout-title">Easy task switching</div>
+      <p>Deploy one base model, keep multiple lightweight LoRA modules. Switch tasks by swapping tiny A and B matrices (35MB vs 350GB).</p>
+    </div>
+    <div class="callout green">
+      <div class="callout-title">Training speedup</div>
+      <p>25% faster training on GPT-3 175B vs full fine-tuning, because gradients don't flow through frozen weights.</p>
+    </div>
+  </div>
+
+  <h3>⚠️ Failure Modes and Limitations</h3>
+
+  <div class="warn">
+    <div class="warn-title">❌ Limitation 1: Batching across different tasks is tricky</div>
+    <p>If you've merged A and B into W, you can't batch inputs for different tasks in one forward pass. You'd need to keep A and B separate and use them dynamically — which adds back some latency.</p>
+  </div>
+
+  <div class="warn">
+    <div class="warn-title">❌ Limitation 2: Rank selection is a hyperparameter</div>
+    <p>Choosing r requires experimentation. Too small r = underfitting (can't express the task adaptation). Too large r = overfitting and loses efficiency. The paper recommends trying r=4 or r=8 as defaults.</p>
+  </div>
+
+  <div class="warn">
+    <div class="warn-title">❌ Limitation 3: Not all weights are adapted</div>
+    <p>The paper only adapts Wq and Wv (query and value) in attention layers, not MLP layers. This may not be optimal for all tasks. The heuristics for which matrices to adapt are not principled.</p>
+  </div>
+
+  <div class="warn">
+    <div class="warn-title">❌ Limitation 4: Very different domains may need larger r</div>
+    <p>If the downstream task is in a completely different domain than pre-training (e.g., a different language), a very small rank may not suffice. The hypothesis of "low intrinsic rank" relies on the task being related to pre-training data.</p>
+  </div>
+
+  <div class="warn">
+    <div class="warn-title">❌ Common Mistake: Confusing adapter layers with LoRA</div>
+    <p>Adapter layers are added sequentially (after each layer), causing inference latency. LoRA is added in parallel to existing weights and can be merged away entirely — no latency. Don't conflate them!</p>
+  </div>
+
+  <!-- ========== SECTION 7: RESULTS ========== -->
+  <h2 id="results"><span class="section-num">7</span>Experimental Results</h2>
+
+  <h3>Result 1: RoBERTa / DeBERTa (NLU tasks — GLUE benchmark)</h3>
+  <p>LoRA with only 0.3M parameters matches or beats full fine-tuning (125M parameters) on the GLUE benchmark. With DeBERTa XXL (1.5B parameters), LoRA achieves an average GLUE score of <strong>91.3</strong> vs full fine-tuning's <strong>91.1</strong> — using only 4.7M trainable parameters!</p>
+
+  <div class="callout green">
+    <p>Key result: LoRA (0.3M params) scored 87.2 avg vs Adapter (0.9M params) scoring 85.4 on RoBERTa-base. LoRA achieves better performance with <em>fewer</em> parameters.</p>
+  </div>
+
+  <h3>Result 2: GPT-2 (NLG tasks — E2E Challenge)</h3>
+  <p>LoRA with 0.35M parameters achieves BLEU score of 70.4, outperforming all baselines including full fine-tuning (68.2) and prefix tuning (69.7). This is a remarkable result — LoRA actually <strong>beats</strong> full fine-tuning while using far fewer trainable parameters!</p>
+
+  <h3>Result 3: GPT-3 175B</h3>
+  <table class="comp-table">
+    <tr><th>Method</th><th>Trainable Params</th><th>WikiSQL Acc.</th><th>MNLI Acc.</th></tr>
+    <tr><td>Full Fine-tuning</td><td>175,255.8M</td><td>73.8%</td><td>89.5%</td></tr>
+    <tr><td>Adapter</td><td>40.1M</td><td>73.2%</td><td>91.5%</td></tr>
+    <tr><td><strong>LoRA</strong></td><td><strong>37.7M</strong></td><td><strong>74.0%</strong></td><td><strong>91.6%</strong></td></tr>
+  </table>
+  <p>LoRA beats full fine-tuning on GPT-3 175B while using just 0.02% of the parameters!</p>
+
+  <h3>Result 4: Which weights to adapt?</h3>
+  <div class="callout amber">
+    <div class="callout-title">Best practice finding</div>
+    <p>Adapting both Wq and Wv (query and value matrices) with rank r=4 each gives better results than adapting only one of them with a higher rank. This shows that breadth (adapting more matrices with lower rank) beats depth (higher rank on fewer matrices).</p>
+  </div>
+
+  <h3>Result 5: What rank r to use?</h3>
+  <p>Surprisingly, <strong>r=1 is often sufficient</strong> for many tasks! Increasing r beyond 4-8 gives diminishing returns. This strongly supports the core hypothesis that the weight update ΔW has a very low intrinsic rank.</p>
+
+  <!-- ========== SECTION 8: DEEP INSIGHTS ========== -->
+  <h2 id="insights"><span class="section-num">8</span>Deep Insights from Section 7 of the Paper</h2>
+
+  <h3>Insight 1: Subspace Overlap between different ranks</h3>
+  <p>The paper performs Singular Value Decomposition (SVD) on the trained adaptation matrices at different ranks (r=8 and r=64). The finding:</p>
+
+  <div class="insight">
+    <p>The top singular vector directions learned with r=8 are also present in r=64. The top 1 direction alone (r=1 approximation) explains why r=1 works so well. Lower ranks capture the most important adaptation directions; higher ranks just add noise.</p>
+  </div>
+
+  <h3>Insight 2: ΔW amplifies features not emphasized in W</h3>
+  <p>When we project the original weight matrix W onto the subspace of ΔW, we find:</p>
+  <ul>
+    <li>ΔW is <strong>not</strong> just repeating the top directions of W — it focuses on different directions.</li>
+    <li>ΔW <strong>amplifies</strong> these task-specific directions by a huge factor (~21.5× for r=4).</li>
+    <li>These are directions that were learned during pre-training but were not emphasized — LoRA "turns them up".</li>
+  </ul>
+
+  <div class="analogy">
+    <div class="emoji">🎚️</div>
+    <h4>Analogy: An Equalizer</h4>
+    <p>Think of the pre-trained model W as a music recording with all frequencies present. Fine-tuning for a specific task is like using an equalizer — you boost certain frequencies (task-specific features) that already exist in the recording, you don't add entirely new ones. LoRA provides a precise, efficient equalizer.</p>
+  </div>
+
+  <h3>Insight 3: The amplification factor</h3>
+  <div class="formula-box">
+    <div class="formula">Amplification Factor = ||ΔW||_F / ||U⊤WV⊤||_F</div>
+    <table class="formula-table">
+      <tr><td>For r=4:</td><td>Factor ≈ 21.5 — a very few directions are strongly amplified</td></tr>
+      <tr><td>For r=64:</td><td>Factor ≈ 2 — many directions are weakly amplified (mostly noise)</td></tr>
+    </table>
+  </div>
+  <p>This explains why small r is better: a focused, strong amplification of a few key task-specific directions is more efficient than weak amplification of many directions.</p>
+
+  <!-- ========== SECTION 9: EXAM QUESTIONS ========== -->
+  <h2 id="exam"><span class="section-num">9</span>Exam-Style Questions and Model Answers</h2>
+
+  <p>Click each question to reveal a model answer.</p>
+
+  <div class="qa-block">
+    <button class="qa-q" onclick="toggleQA(this)">Q1. What is the core mathematical idea behind LoRA? (6 marks) <span>▼</span></button>
+    <div class="qa-a">
+      <p>LoRA proposes that the change in weights during model adaptation (ΔW) has a low intrinsic rank. Instead of directly optimizing the full d×k weight update, LoRA represents it as the product of two small matrices: ΔW = BA, where B ∈ ℝ^(d×r) and A ∈ ℝ^(r×k), with r ≪ min(d,k).</p>
+      <p>During training, the pre-trained weight matrix W₀ is frozen. Only A and B are updated. The forward pass becomes: h = W₀x + BAx. After training, the matrices can be merged (W = W₀ + BA) for zero-latency deployment.</p>
+      <p>This reduces the number of trainable parameters from d×k to r×(d+k), which for typical GPT-3 dimensions (d=k=12,288, r=4) is a reduction factor of ~1,500×.</p>
+    </div>
+  </div>
+
+  <div class="qa-block">
+    <button class="qa-q" onclick="toggleQA(this)">Q2. Why does LoRA not add inference latency, unlike adapter layers? (4 marks) <span>▼</span></button>
+    <div class="qa-a">
+      <p>Adapter layers are added sequentially between transformer sub-layers. During inference, every forward pass must process the adapter layer in addition to the original layer, adding sequential computation that cannot be parallelized away.</p>
+      <p>LoRA, on the other hand, operates in parallel with the original weights and can be fully merged after training: W_deployed = W₀ + BA. The resulting matrix has the same shape as W₀, so the model architecture is identical to the original. Inference is just a single matrix multiplication — no overhead whatsoever.</p>
+    </div>
+  </div>
+
+  <div class="qa-block">
+    <button class="qa-q" onclick="toggleQA(this)">Q3. Why is B initialized to zero and A to Gaussian noise? (4 marks) <span>▼</span></button>
+    <div class="qa-a">
+      <p>This initialization strategy ensures that ΔW = BA = 0 at the start of training. This means the model begins training from exactly the pre-trained state, with no disruption to the learned representations.</p>
+      <p>If both A and B were initialized with random values, ΔW would be non-zero from the start, which could destabilize training and move the model away from its well-trained initialization before any task-specific learning occurs.</p>
+      <p>Note: A cannot also be zero, because then gradients through A would be zero (dead initialization). By making A random and B zero, we get ΔW=0 initially while still having non-zero gradients for learning.</p>
+    </div>
+  </div>
+
+  <div class="qa-block">
+    <button class="qa-q" onclick="toggleQA(this)">Q4. What does the empirical finding about subspace similarity tell us? (5 marks) <span>▼</span></button>
+    <div class="qa-a">
+      <p>When comparing LoRA adaptation matrices trained with r=8 vs r=64, the paper uses SVD and computes normalized subspace similarity (the Grassmann distance metric φ(A,B,i,j)).</p>
+      <p>The key finding is that the top singular vector directions of r=8 strongly overlap with those of r=64 (similarity &gt; 0.5 for the top direction). This means increasing r beyond a small value does not capture meaningfully new directions — it just adds directions that are mostly noise accumulated during training.</p>
+      <p>This validates the core hypothesis: the adaptation matrix ΔW truly has a low intrinsic rank. A rank as small as 1 can capture the most important adaptation direction for a given task, which is why r=1 often works surprisingly well on downstream tasks like GPT-3 benchmarks.</p>
+    </div>
+  </div>
+
+  <div class="qa-block">
+    <button class="qa-q" onclick="toggleQA(this)">Q5. Compare full fine-tuning, adapter tuning, prefix tuning, and LoRA across five dimensions. (8 marks) <span>▼</span></button>
+    <div class="qa-a">
+      <table class="comp-table" style="font-size:0.85rem">
+        <tr><th>Dimension</th><th>Full Fine-tuning</th><th>Adapter Tuning</th><th>Prefix Tuning</th><th>LoRA</th></tr>
+        <tr><td>Trainable params</td><td>All (100%)</td><td>~1% extra</td><td>~0.1% extra</td><td>~0.01% extra</td></tr>
+        <tr><td>Inference latency</td><td>None (baseline)</td><td>Yes (sequential)</td><td>Yes (reduced seq len)</td><td>None (merge)</td></tr>
+        <tr><td>Task performance</td><td>Excellent</td><td>Good</td><td>Variable, degrades with more tokens</td><td>Matches or beats FT</td></tr>
+        <tr><td>Storage per task</td><td>Full model copy</td><td>Full model + adapters</td><td>Full model + prefix</td><td>Full model + tiny LoRA</td></tr>
+        <tr><td>Sequence length impact</td><td>None</td><td>None</td><td>Reduces usable length</td><td>None</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========== SECTION 10: INTERVIEW QUESTIONS ========== -->
+  <h2 id="interview"><span class="section-num">10</span>Interview Questions</h2>
+
+  <div class="int-q">
+    <div class="diff easy">Easy</div>
+    <p>What is the main problem LoRA solves, and in one sentence, how does it solve it?</p>
+  </div>
+
+  <div class="int-q">
+    <div class="diff easy">Easy</div>
+    <p>What does "freezing" the pre-trained weights mean, and why is it desirable?</p>
+  </div>
+
+  <div class="int-q">
+    <div class="diff med">Medium</div>
+    <p>Explain why LoRA's A matrix is initialized with Gaussian noise while B is initialized to zero. What would happen if both were random?</p>
+  </div>
+
+  <div class="int-q">
+    <div class="diff med">Medium</div>
+    <p>A new engineer says "I'll just use a very large rank r=512 for LoRA to be safe." What would you tell them, based on the paper's findings?</p>
+  </div>
+
+  <div class="int-q">
+    <div class="diff med">Medium</div>
+    <p>How would you switch a deployed LoRA-adapted model from task A to task B with minimal overhead?</p>
+  </div>
+
+  <div class="int-q">
+    <div class="diff hard">Hard</div>
+    <p>The paper shows that ΔW amplifies directions that are "not emphasized" in W₀ rather than the top singular directions of W₀. What does this tell us about the nature of task-specific knowledge in LLMs?</p>
+  </div>
+
+  <div class="int-q">
+    <div class="diff hard">Hard</div>
+    <p>LoRA is said to be a generalization of full fine-tuning. Explain mathematically what happens to LoRA as r → d (full rank). What are the practical implications?</p>
+  </div>
+
+  <div class="int-q">
+    <div class="diff hard">Hard</div>
+    <p>A colleague proposes using LoRA on the MLP layers instead of the attention layers. Based on what you know about transformers and the paper's findings, would you support this? What experiments would you run to validate?</p>
+  </div>
+
+  <!-- ========== SECTION 11: PRACTICE EXERCISES ========== -->
+  <h2 id="exercises"><span class="section-num">11</span>Practice Exercises (Easy → Hard)</h2>
+
+  <div class="exercise">
+    <div class="ex-label">🌱 Exercise 1 — Easy: Parameter Counting</div>
+    <p>For a weight matrix of size 768 × 768 (as in BERT-base), calculate the number of trainable parameters using LoRA with rank r=8. Compare this to full fine-tuning. By what factor is LoRA more efficient?</p>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-label">🌱 Exercise 2 — Easy: Conceptual</div>
+    <p>In your own words and without using any formulas, explain to a non-technical person why training only two small matrices can be enough to adapt a giant AI model to a new task.</p>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-label">🌿 Exercise 3 — Medium: Dimension Check</div>
+    <p>GPT-3 has d_model = 12,288 and 96 layers. If we apply LoRA (r=4) to both Wq and Wv in every attention layer, how many total trainable parameters does LoRA add? Express your answer in millions.</p>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-label">🌿 Exercise 4 — Medium: Code Understanding</div>
+    <p>A PyTorch forward pass for a LoRA layer looks like: <code>output = x @ W0.T + (x @ A.T) @ B.T * (alpha / r)</code>. Explain what each term does and why the scaling factor (alpha/r) is applied to the LoRA branch rather than the original weights.</p>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-label">🌳 Exercise 5 — Hard: Critical Analysis</div>
+    <p>The paper claims LoRA "performs on par or better than fine-tuning." However, a critic argues: "LoRA's advantage might come from its regularization effect (low-rank constraint), not from parameter efficiency." Design an experiment to test this hypothesis. What control conditions would you need?</p>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-label">🌳 Exercise 6 — Hard: Extension</div>
+    <p>LoRA currently works by initializing B=0. This means ΔW starts at zero and grows during training. Propose an alternative initialization strategy that might work better for tasks that are very different from the pre-training distribution. What trade-offs would your approach have?</p>
+  </div>
+
+  <!-- ========== SECTION 12: RESOURCES ========== -->
+  <h2 id="resources"><span class="section-num">12</span>Further Resources</h2>
+
+  <h3>Primary Sources</h3>
+  <div class="resources">
+    <a class="resource-link" href="https://arxiv.org/abs/2106.09685" target="_blank">
+      <div class="rl-icon">📄</div>
+      <div class="rl-text">
+        <div class="rl-title">LoRA Original Paper (arXiv)</div>
+        <div>Hu et al., 2021 — The primary source</div>
+      </div>
+    </a>
+    <a class="resource-link" href="https://github.com/microsoft/LoRA" target="_blank">
+      <div class="rl-icon">💻</div>
+      <div class="rl-text">
+        <div class="rl-title">Official LoRA GitHub Repository (Microsoft)</div>
+        <div>Original implementation in PyTorch</div>
+      </div>
+    </a>
+  </div>
+
+  <h3>Background Prerequisites</h3>
+  <div class="resources">
+    <a class="resource-link" href="https://arxiv.org/abs/1706.03762" target="_blank">
+      <div class="rl-icon">🤖</div>
+      <div class="rl-text">
+        <div class="rl-title">Attention Is All You Need (Vaswani et al., 2017)</div>
+        <div>The original Transformer paper — essential background</div>
+      </div>
+    </a>
+    <a class="resource-link" href="https://arxiv.org/abs/2012.13255" target="_blank">
+      <div class="rl-icon">📐</div>
+      <div class="rl-text">
+        <div class="rl-title">Intrinsic Dimensionality of LLM Fine-Tuning (Aghajanyan et al., 2020)</div>
+        <div>The key theoretical motivation for LoRA</div>
+      </div>
+    </a>
+  </div>
+
+  <h3>Practical Implementations</h3>
+  <div class="resources">
+    <a class="resource-link" href="https://huggingface.co/docs/peft/index" target="_blank">
+      <div class="rl-icon">🤗</div>
+      <div class="rl-text">
+        <div class="rl-title">HuggingFace PEFT Library</div>
+        <div>Production-ready LoRA implementation — easiest way to use LoRA today</div>
+      </div>
+    </a>
+    <a class="resource-link" href="https://lightning.ai/pages/community/tutorial/lora-llm/" target="_blank">
+      <div class="rl-icon">⚡</div>
+      <div class="rl-text">
+        <div class="rl-title">Lightning AI: LoRA from Scratch Tutorial</div>
+        <div>Step-by-step implementation guide</div>
+      </div>
+    </a>
+  </div>
+
+  <h3>For Deeper Mathematical Understanding</h3>
+  <div class="resources">
+    <a class="resource-link" href="https://en.wikipedia.org/wiki/Singular_value_decomposition" target="_blank">
+      <div class="rl-icon">∑</div>
+      <div class="rl-text">
+        <div class="rl-title">Singular Value Decomposition (SVD)</div>
+        <div>Key linear algebra concept underlying LoRA analysis</div>
+      </div>
+    </a>
+    <a class="resource-link" href="https://arxiv.org/abs/2305.14314" target="_blank">
+      <div class="rl-icon">🔬</div>
+      <div class="rl-text">
+        <div class="rl-title">QLoRA: Efficient Finetuning of Quantized LLMs</div>
+        <div>Important follow-up work combining LoRA with quantization</div>
+      </div>
+    </a>
+  </div>
+
+  <hr>
+
+  <!-- Summary box -->
+  <div class="callout purple">
+    <div class="callout-title">🎯 One-Sentence Summary (Compression Law)</div>
+    <p>LoRA exploits the empirical fact that weight updates needed for task adaptation live in a very low-dimensional subspace, allowing us to train only two tiny matrices per layer — reducing trainable parameters by 10,000× with no loss in quality and no inference overhead.</p>
+  </div>
+
+  <div class="tags">
+    <span class="tag">Large Language Models</span>
+    <span class="tag">Parameter-Efficient Fine-Tuning</span>
+    <span class="tag">Low-Rank Matrices</span>
+    <span class="tag">Transformer</span>
+    <span class="tag">Transfer Learning</span>
+    <span class="tag">GPT-3</span>
+    <span class="tag">SVD</span>
+    <span class="tag">NLP</span>
+  </div>
+
+  <p style="text-align:center;color:#999;font-size:0.82rem;margin-top:36px">
+    Guide created using the Bloom's Taxonomy learning framework · Paper: arXiv:2106.09685 · Microsoft Research, 2021
+  </p>
+
+</div>
+
+<script>
+function toggleQA(btn) {
+  const answer = btn.nextElementSibling;
+  const isOpen = answer.classList.contains('open');
+  answer.classList.toggle('open', !isOpen);
+  btn.querySelector('span').textContent = isOpen ? '▼' : '▲';
+}
+</script>
+</body>
+</html>
